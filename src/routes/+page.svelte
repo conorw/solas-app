@@ -15,7 +15,7 @@
 </script>
 
 <main>
-	<h1>SvelteKit & Supabase Auth</h1>
+	<h1>Solas Attendance Tracker</h1>
 	{#if data.session}
 		<p>Welcome, {data.session.user.email}</p>
 		<form action="/logout" method="POST" use:enhance={submitLogout}>
