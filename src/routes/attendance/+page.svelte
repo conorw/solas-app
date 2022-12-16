@@ -61,6 +61,10 @@
 
 	const addAttendee = async () => {
 		console.log('adding', { selectedPerson, selectedDate, selectedService });
+		if (!selectedPerson || !selectedDate || !selectedService) {
+			alert('Please select a person, date and service');
+			return;
+		}
 		const ret = await supabaseClient
 			.from('attendance')
 			.insert([
@@ -164,10 +168,13 @@
 							</Text> -->
 					<Card>
 						<Content
-							><PrimaryText>{attend['Person Name']} <IconButton
-								class="material-icons"
-								on:click={() => deleteAttendance(attend['Auto ID'])}>delete</IconButton
-							></PrimaryText>
+							><PrimaryText
+								>{attend['Person Name']}
+								<IconButton
+									class="material-icons"
+									on:click={() => deleteAttendance(attend['Auto ID'])}>delete</IconButton
+								></PrimaryText
+							>
 
 							<Select
 								on:SMUISelect:change={() => updateService(attend)}
@@ -177,8 +184,7 @@
 									<Option value={service.Name}>{service.Name}</Option>
 								{/each}
 							</Select>
-							</Content
-						>
+						</Content>
 					</Card>
 				</Cell>
 			{/each}
