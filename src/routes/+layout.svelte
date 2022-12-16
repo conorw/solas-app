@@ -2,7 +2,13 @@
 	import { invalidateAll } from '$app/navigation';
 	import { supabaseClient } from '$lib/supabase';
 	import { onMount } from 'svelte';
+	import type { PageData } from './$types';
+	import TopAppBar, { Row, Section, Title } from '@smui/top-app-bar';
+
+	export let data: PageData;
 	import '../app.postcss';
+	import type { SubmitFunction } from '@sveltejs/kit';
+	import { enhance } from '$app/forms';
 
 	onMount(() => {
 		const {
@@ -16,6 +22,36 @@
 			subscription.unsubscribe();
 		};
 	});
+	const submitLogout: SubmitFunction = async ({ cancel }) => {
+		const { error } = await supabaseClient.auth.signOut();
+		if (error) {
+			console.log(error);
+		}
+		cancel();
+	};
 </script>
+
+<TopAppBar variant="static">
+	<Row>
+		<Section>
+			<Title>Solas Attendance Tracker</Title>
+		</Section>
+		<Section>
+			{#if data.session}
+				<a href="/attendance">Attendance Tracker</a>
+				<a href="/reset-password">Reset Password</a>
+				<form action="/logout" method="POST" use:enhance={submitLogout}>
+					<button type="submit" class="btn btn-primary">Logout</button>
+				</form>
+			{/if}
+		</Section>
+	</Row>
+</TopAppBar>
+<!-- <nav class="crumbs">
+		<ul>
+			<li class="crumb"><a href="/attendance">Attendance Tracker</a></li>
+			<li class="crumb"><a href="/reset-password">Reset Password</a></li>
+		</ul>
+	</nav> -->
 
 <slot />
