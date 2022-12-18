@@ -15,6 +15,12 @@ declare global {
 		interface PageData {
 			session: import("@supabase/supabase-js").Session | null
 		}
+
+		interface Supabase {
+			Database: import('./src/types/supabase').Database;
+			SchemaName: 'public';
+		}
+
 		// interface Platform {}
 	}
 }
