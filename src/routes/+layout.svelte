@@ -34,7 +34,7 @@
 <TopAppBar variant="static">
 	<Row>
 		<Section>
-			<Title>Solas Attendance Tracker</Title>
+			<Title href="/">Solas Attendance Tracker</Title>
 		</Section>
 		<Section>
 			{#if data.session}

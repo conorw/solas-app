@@ -149,7 +149,7 @@
 			</Button>
 		</div>
 		<div>
-			If user not found. <Button>Add New user</Button>
+			If user not found. <Button href="/people/new">Add New user</Button>
 		</div>
 	</Cell>
 	<Cell span={8}>

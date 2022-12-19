@@ -37,4 +37,4 @@
 	};
 </script>
 
-<PersonForm {person} onSave={()=>goto('/people')} />
+<PersonForm {person} onSave={()=>history.back()} />
