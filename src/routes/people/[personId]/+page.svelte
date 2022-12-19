@@ -4,6 +4,6 @@
 	export let data: PageData;
 </script>
 
-<PersonForm person={data?.person}>
+<PersonForm onSave={()=>history.back()} person={data?.person}>
 
 </PersonForm>

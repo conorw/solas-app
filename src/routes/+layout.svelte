@@ -43,7 +43,10 @@
 					|
 					<li><a href="/people">People</a></li>
 					|
-
+					{#if data?.profile.isAdmin}
+						<li><a href="/admin/service">Service</a></li>
+						|
+					{/if}
 				</ul>
 				<form action="/logout" method="POST" use:enhance={submitLogout}>
 					<button type="submit" class="btn btn-primary"

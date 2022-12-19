@@ -9,7 +9,7 @@ const config = {
 		target: "#svelte",
 		vite: {
 			ssr: {
-				noExternal: ['dayjs']
+				noExternal: ['dayjs', '@carbon/charts', 'carbon-components']
 			}
 		}
 	}

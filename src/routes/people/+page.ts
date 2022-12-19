@@ -13,8 +13,6 @@ export const load: PageLoad = async ({ params, url }) => {
         .select(`*`),
     ])
 
-    console.log('people', {peopleData})
-
     // if (error && status !== 406) throw error
 
     return {

@@ -21,7 +21,7 @@
 
 <Textfield value={query} on:input={(event) => handleInput(event)} label="Search" />
 <Button style="float:right;" href="/people/new" variant="unelevated" class="button-shaped-round">
-	<Icon class="material-icons">save</Icon>
+	<Icon class="material-icons">add</Icon>
 	<Label>Add New Person</Label>
 </Button>
 <DataTable table$aria-label="User list" style="width: 100%;height:90%">

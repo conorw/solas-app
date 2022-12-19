@@ -12,8 +12,6 @@ export const load: PageLoad = async ({ params, url }) => {
         .select(`*`).eq(`Id`, params.personId).single()
     ])
 
-    console.log('people', {peopleData})
-
     // if (error && status !== 406) throw error
 
     return {
