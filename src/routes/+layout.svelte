@@ -34,14 +34,21 @@
 <TopAppBar variant="static">
 	<Row>
 		<Section>
-			<Title href="/">Solas Attendance Tracker</Title>
+			<Title><a href="/">Solas Attendance Tracker</a></Title>
 		</Section>
 		<Section>
 			{#if data.session}
-				<a href="/attendance">Attendance Tracker</a>
-				<a href="/reset-password">Reset Password</a>
+				<ul id="menu" >
+					<li><a href="/attendance">Attendance Tracker</a></li>
+					|
+					<li><a href="/people">People</a></li>
+					|
+
+				</ul>
 				<form action="/logout" method="POST" use:enhance={submitLogout}>
-					<button type="submit" class="btn btn-primary">Logout</button>
+					<button type="submit" class="btn btn-primary"
+						>Logout {data?.session?.user?.email}</button
+					>
 				</form>
 			{/if}
 		</Section>
@@ -55,3 +62,9 @@
 	</nav> -->
 
 <slot />
+
+<style>
+	ul#menu li{
+		display : inline;
+	}
+</style>
