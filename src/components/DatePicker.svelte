@@ -18,6 +18,8 @@
 
     export let selected: Date;
 
+    console.log('selected', selected);
+
 	$: $store?.selected ? onChange($store?.selected) : () => {};
 </script>
 

@@ -1,23 +1,43 @@
 <script lang="ts">
+	import type { person } from '$lib/types/rows';
 	import DataTable, { Head, Body, Row, Cell, Label, SortValue } from '@smui/data-table';
-	import IconButton from '@smui/icon-button';
+
+	import Button, { Icon } from '@smui/button';
+	import Textfield from '@smui/textfield';
+	import { DateTime } from 'luxon';
 	import type { PageData } from './$types';
 	export let data: PageData;
-	// let sort: keyof User = 'id';
-	let sortDirection: Lowercase<keyof typeof SortValue> = 'ascending';
+	let query = '';
+	const handleInput = (e: any) => {
+		console.log('handleInput', e);
+		query = e.target.value;
+		const queryVal = e.target.value.toLowerCase();
+		people = data.people.filter((p: person) => {
+			return `${p.FirstName} ${p.LastName}`.toLowerCase().includes(queryVal);
+		});
+	};
+	let people = data.people;
 </script>
 
+<Textfield value={query} on:input={(event) => handleInput(event)} label="Search" />
+<Button style="float:right;" href="/people/new" variant="unelevated" class="button-shaped-round">
+	<Icon class="material-icons">save</Icon>
+	<Label>Add New Person</Label>
+</Button>
 <DataTable table$aria-label="User list" style="width: 100%;height:90%">
 	<Head>
 		<Row>
 			<Cell columnId="Id">
 				<Label>Id</Label>
 			</Cell>
-			<Cell columnId="firstname" >
+			<Cell columnId="firstname">
 				<Label>First Name</Label>
 			</Cell>
-            <Cell columnId="lastname">
+			<Cell columnId="lastname">
 				<Label>Last Name</Label>
+			</Cell>
+			<Cell columnId="lastname">
+				<Label>Born</Label>
 			</Cell>
 			<!-- 
             <Cell columnId="username">
@@ -33,12 +53,14 @@
 		</Row>
 	</Head>
 	<Body>
-		{#each data?.people as item}
+		{#each people as item}
 			<Row>
 				<Cell>{item?.Id}</Cell>
 				<Cell>{item.FirstName}</Cell>
-                <Cell>{item.LastName}</Cell>
-                <!-- 
+				<Cell>{item.LastName}</Cell>
+				<Cell>{item.DateOfBirth ? DateTime.fromISO(item.DateOfBirth).toFormat('yyyy') : ''}</Cell>
+				<Cell><a href={`/people/${item.Id}`}>Edit</a></Cell>
+				<!-- 
         <Cell>{item.username}</Cell>
         <Cell>{item.email}</Cell>
         <Cell>{item.website}</Cell> -->

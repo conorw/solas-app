@@ -3,6 +3,7 @@
 
 
 import { supabaseClient } from '$lib/supabase'
+import type { person } from '$lib/types/rows';
 import { DateTime } from 'luxon';
 import type { PageLoad } from './$types';
 
@@ -19,6 +20,6 @@ export const load: PageLoad = async ({ params, url }) => {
     return {
         people: (peopleData?.data?.sort((a, b) =>
         b.FirstName?.toLowerCase() > a.FirstName?.toLowerCase() ? 1 : b.FirstName?.toLowerCase() < a.FirstName?.toLowerCase() ? -1 : 0
-    ) || []).reverse()
+    ) || []).reverse() as person[]
     };
 }
