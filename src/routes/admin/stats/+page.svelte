@@ -13,7 +13,7 @@
 	export let data: PageData;
 	let active = 'All';
 	let stats = data.stats;
-	function groupBy(list, keyGetter) {
+	function groupBy(list, keyGetter, sort=true) {
 		const map = new Map();
 		list.forEach((item) => {
 			const key = keyGetter(item);
@@ -24,7 +24,7 @@
 				collection.push(item);
 			}
 		});
-		return [...map.entries()].sort((a, b) => b[1].length - a[1].length);
+		return sort ? [...map.entries()].sort((a, b) => b[1].length - a[1].length) : [...map.entries()];
 	}
 	let groupedService = groupBy(data.stats, (stat: { ServiceName: any }) => stat.ServiceName);
 	let groupedByMonth = groupBy(data.stats, (stat: attendance) => DateTime.fromISO(stat.Date!).monthLong);
