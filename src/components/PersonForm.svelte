@@ -47,7 +47,9 @@
 	<Cell>
 		<Label>Date of Birth</Label>
 		<DatePicker
-			selected={person ? DateTime.fromISO(person?.DateOfBirth || '').toJSDate() : new Date()}
+			selected={person?.DateOfBirth
+				? DateTime.fromISO(person?.DateOfBirth || '').toJSDate()
+				: new Date('1970-01-01')}
 			onChange={(e) => {
 				if (e !== person?.DateOfBirth) {
 					console.log(e);
@@ -97,7 +99,7 @@
 		</Select>
 	</Cell>
 	<Cell>
-		<Textfield bind:value={person.OtherInfo} label="Other Info" />
+		<Textfield textarea bind:value={person.OtherInfo} label="Other Info" />
 	</Cell>
 	<Cell>
 		<FormField>
@@ -203,14 +205,16 @@
 			</FormField>
 		</Cell>
 	{/if}
+	<Cell span={12}>
+		<Button style="width: 100%;" on:click={save} variant="unelevated" class="button-shaped-round">
+			<Icon class="material-icons">save</Icon>
+			<Label>Save</Label>
+		</Button>
+	</Cell>
 </LayoutGrid>
 <Snackbar bind:this={snackbar} timeoutMs={-1}>
 	<Label>{text}</Label>
 	<Actions>
-	  <IconButton class="material-icons" title="Dismiss">close</IconButton>
+		<IconButton class="material-icons" title="Dismiss">close</IconButton>
 	</Actions>
 </Snackbar>
-<Button on:click={save} variant="unelevated" class="button-shaped-round">
-	<Icon class="material-icons">save</Icon>
-	<Label>Save</Label>
-</Button>

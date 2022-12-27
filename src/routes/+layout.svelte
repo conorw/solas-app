@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
 	import { supabaseClient } from '$lib/supabase';
+	import Button, { Icon } from '@smui/button';
+	import IconButton from '@smui/icon-button';
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
 	import TopAppBar, { Row, Section, Title } from '@smui/top-app-bar';
@@ -34,27 +36,23 @@
 <TopAppBar variant="static">
 	<Row>
 		<Section>
-			<Title><a href="/">Solas Attendance Tracker</a></Title>
+			<IconButton href="/" class="material-icons" aria-label="Home">home</IconButton>
 		</Section>
-		<Section>
-			{#if data.session}
-				<ul id="menu" >
-					<li><a href="/attendance">Attendance Tracker</a></li>
-					|
-					<li><a href="/people">People</a></li>
-					|
-					{#if data?.profile.isAdmin}
-						<li><a href="/admin/service">Service</a></li>
-						|
-					{/if}
-				</ul>
+		{#if data.session}
+			<Section align="end" toolbar>
+				<IconButton href="/people" class="material-icons" aria-label="People">people</IconButton>
+				{#if data?.profile.isAdmin}
+					<IconButton href="/admin/service" class="material-icons" aria-label="Service">settings</IconButton>
+					<IconButton href="/admin/stats" class="material-icons" aria-label="stats">query_stats</IconButton>
+				{/if}
+				<!-- <IconButton class="material-icons" aria-label="logout">logout</IconButton> -->
 				<form action="/logout" method="POST" use:enhance={submitLogout}>
-					<button type="submit" class="btn btn-primary"
-						>Logout {data?.session?.user?.email}</button
+					<Button type="submit"
+						>Logout {data?.session?.user?.email}</Button
 					>
 				</form>
-			{/if}
-		</Section>
+			</Section>
+		{/if}
 	</Row>
 </TopAppBar>
 <!-- <nav class="crumbs">
@@ -67,7 +65,7 @@
 <slot />
 
 <style>
-	ul#menu li{
-		display : inline;
+	ul#menu li {
+		display: inline;
 	}
 </style>

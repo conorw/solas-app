@@ -1,6 +1,8 @@
 <script lang="ts">
 	import '@carbon/styles/css/styles.css';
 	import '@carbon/charts/styles.css';
+	import DataTable, { Head, Body, Row, Cell, SortValue } from '@smui/data-table';
+
 	import { BarChartSimple } from '@carbon/charts-svelte';
 	import DatePicker from '../../../components/DatePicker.svelte';
 	import { page } from '$app/stores';
@@ -29,18 +31,19 @@
 	let groupedService = groupBy(data.stats, (stat: { ServiceName: any }) => stat.ServiceName);
 	let groupedByMonth = groupBy(data.stats, (stat: attendance) => DateTime.fromISO(stat.Date!).monthLong);
 	let groupedUser = groupBy(data.stats, (stat: attendance) => stat['Person Id']);
-	// console.log(groupedService.values());
+
+	console.log(groupedUser);
 	let popularService = `${groupedService[0][0]} (${groupedService[0][1].length})`;
 </script>
 
 <DatePicker
-	onChange={(e) => {
+	onChange={async (e) => {
 		// selectedDate = e;
 		if (DateTime.fromJSDate(e).toFormat('yyyy-MM-dd') !== data.fromDate) {
 			console.log(e);
 			data.fromDate = DateTime.fromJSDate(e).toFormat('yyyy-MM-dd');
 			$page.url.searchParams.set('fromDate', data.fromDate);
-			goto($page.url.pathname + '?' + $page.url.searchParams.toString(), { replaceState: true });
+			await goto($page.url.pathname + '?' + $page.url.searchParams.toString(), { replaceState: true, invalidateAll: true });
 		}
 	}}
 	selected={new Date(data.fromDate)}
@@ -71,9 +74,9 @@
 				<p>{stat['Person Name']}</p>
 			</div>
 		{/each} -->
-		Total Unique People: {groupedUser.length}
-		Total Sessions: {data.stats.length}
-		Most Popular Service: {popularService}
+		<h2>Total Unique People: {groupedUser.length}</h2>
+		<h2>Total Sessions: {data.stats.length}</h2>
+		<h2>Most Popular Service: {popularService}</h2>
 		<BarChartSimple
 			data={groupedByMonth.map((t) => {
 				return { group: t[0], value: t[1].length };
@@ -87,8 +90,6 @@
 				}
 			}}
 		/>
-	{/if}
-	{#if active === 'By Service'}
 		<BarChartSimple
 			data={groupedService.map((t) => {
 				return { group: t[0], value: t[1].length };
@@ -102,6 +103,27 @@
 				}
 			}}
 		/>
+		<DataTable table$aria-label="User list">
+			<Head>
+				<Row>
+					<Cell columnId="name">
+						<Label>Name</Label>
+					</Cell>
+					<Cell columnId="total">
+						<Label>Sessions</Label>
+					</Cell>
+				</Row>
+			</Head>
+			<Body>
+				{#each groupedUser as item}
+					<Row>
+						<Cell>{item?.[1][0]['Person Name']}</Cell>
+						<Cell>
+							{item?.[1].length}
+						</Cell>
+					</Row>
+				{/each}
+			</Body>
+		</DataTable>
 	{/if}
-	{#if active === 'By Person'}{/if}
 {/if}

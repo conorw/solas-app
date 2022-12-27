@@ -145,7 +145,7 @@
 		</div>
 		<div>
 			<Button on:click={addAttendee} variant="raised">
-				<Label>Add Attendee To List</Label>
+				<Label>Add Attendee To List ></Label>
 			</Button>
 		</div>
 		<div>
