@@ -78,19 +78,6 @@
 		<h2>Total Sessions: {data.stats.length}</h2>
 		<h2>Most Popular Service: {popularService}</h2>
 		<BarChartSimple
-			data={groupedByMonth.map((t) => {
-				return { group: t[0], value: t[1].length };
-			})}
-			options={{
-				title: 'Totals',
-				height: '400px',
-				axes: {
-					left: { mapsTo: 'value' },
-					bottom: { mapsTo: 'group', scaleType: 'labels' }
-				}
-			}}
-		/>
-		<BarChartSimple
 			data={groupedService.map((t) => {
 				return { group: t[0], value: t[1].length };
 			})}
@@ -103,6 +90,28 @@
 				}
 			}}
 		/>
+		<DataTable table$aria-label="Service list">
+			<Head>
+				<Row>
+					<Cell columnId="name">
+						<Label>Name</Label>
+					</Cell>
+					<Cell columnId="total">
+						<Label>Sessions</Label>
+					</Cell>
+				</Row>
+			</Head>
+			<Body>
+				{#each groupedService as item}
+					<Row>
+						<Cell>{item?.[0]}</Cell>
+						<Cell>
+							{item?.[1].length}
+						</Cell>
+					</Row>
+				{/each}
+			</Body>
+		</DataTable>
 		<DataTable table$aria-label="User list">
 			<Head>
 				<Row>
@@ -125,5 +134,18 @@
 				{/each}
 			</Body>
 		</DataTable>
+		<BarChartSimple
+		data={groupedByMonth.map((t) => {
+			return { group: t[0], value: t[1].length };
+		})}
+		options={{
+			title: 'Totals',
+			height: '400px',
+			axes: {
+				left: { mapsTo: 'value' },
+				bottom: { mapsTo: 'group', scaleType: 'labels' }
+			}
+		}}
+	/>
 	{/if}
 {/if}
