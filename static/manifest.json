@@ -1,0 +1,17 @@
+{
+    "short_name": "Solas Attendance Tracker",
+    "name": "Solas Attendance Tracker",
+    "start_url": "/",
+    "icons": [
+      {
+        "src": "logo.png",
+        "type": "image/png",
+        "sizes": "512x512"
+      }
+    ],
+    "background_color": "#ffffff",
+    "display": "standalone",
+    "scope": "/",
+    "theme_color": "#ffffff",
+    "description": "Solas tracker"
+}
