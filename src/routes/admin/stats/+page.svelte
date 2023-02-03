@@ -7,34 +7,11 @@
 	import DatePicker from '../../../components/DatePicker.svelte';
 	import { page } from '$app/stores';
 	import { DateTime } from 'luxon';
-	import type { PageData } from './$types';
+	import type { PageServerData } from './$types';
 	import { goto } from '$app/navigation';
-	import type { attendance } from '$lib/types/rows';
-	export let data: PageData;
+	export let data: PageServerData;
 
 	let stats = data.stats;
-	function groupBy(list, keyGetter, sort = true) {
-		const map = new Map();
-		list.forEach((item) => {
-			const key = keyGetter(item);
-			const collection = map.get(key);
-			if (!collection) {
-				map.set(key, [item]);
-			} else {
-				collection.push(item);
-			}
-		});
-		return sort ? [...map.entries()].sort((a, b) => b[1].length - a[1].length) : [...map.entries()];
-	}
-	let groupedService = groupBy(data.stats, (stat: { ServiceName: any }) => stat.ServiceName);
-	let groupedByMonth = groupBy(
-		data.stats,
-		(stat: attendance) => DateTime.fromISO(stat.Date!).monthLong
-	);
-	let groupedUser = groupBy(data.stats, (stat: attendance) => stat['Person Id']);
-
-	console.log(groupedUser);
-	let popularService = `${groupedService[0][0]} (${groupedService[0][1].length})`;
 </script>
 
 <DatePicker
@@ -72,11 +49,11 @@
 				<p>{stat['Person Name']}</p>
 			</div>
 		{/each} -->
-	<h2>Total Unique People: {groupedUser.length}</h2>
+	<h2>Total Unique People: {data.groupedUser.length}</h2>
 	<h2>Total Sessions: {data.stats.length}</h2>
-	<h2>Most Popular Service: {popularService}</h2>
+	<h2>Most Popular Service: {data.popularService}</h2>
 	<BarChartSimple
-		data={groupedService.map((t) => {
+		data={data.groupedService?.map((t) => {
 			return { group: t[0], value: t[1].length };
 		})}
 		options={{
@@ -100,7 +77,7 @@
 			</Row>
 		</Head>
 		<Body>
-			{#each groupedService as item}
+			{#each data.groupedService as item}
 				<Row>
 					<Cell>{item?.[0]}</Cell>
 					<Cell>
@@ -122,9 +99,13 @@
 			</Row>
 		</Head>
 		<Body>
-			{#each groupedUser as item}
+			{#each data.groupedUser as item}
 				<Row>
-					<Cell><a target="_blank" href={`/people/${item?.[1][0]['Person Id']}`}>{item?.[1][0]['Person Name']}</a></Cell>
+					<Cell
+						><a target="_blank" href={`/people/${item?.[1][0]['Person Id']}`}
+							>{item?.[1][0]['Person Name']}</a
+						></Cell
+					>
 					<Cell>
 						{item?.[1].length}
 					</Cell>
@@ -133,7 +114,7 @@
 		</Body>
 	</DataTable>
 	<BarChartSimple
-		data={groupedByMonth.map((t) => {
+		data={data.groupedByMonth.map((t) => {
 			return { group: t[0], value: t[1].length };
 		})}
 		options={{
