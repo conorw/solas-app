@@ -17,7 +17,6 @@ export const load: PageLoad = async ({ params, url }) => {
         .select(`Name, "Auto ID"`).eq(`Is Current`, true)
         .order('Name', { ascending: true })])
 
-        console.log('service', {serviceData})
     // if (error && status !== 406) throw error
 
     return {
