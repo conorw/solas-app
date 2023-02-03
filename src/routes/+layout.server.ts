@@ -10,7 +10,7 @@ export const load: LayoutServerLoad = async (event) => {
 	if (event.url.pathname === '/') throw redirect(302, "/attendance")
 	const profile = await (await supabaseClient.from('profiles').select('*').eq('id', session?.user?.id).single()).data;
 	console.log('PROFILE', profile)
-	if (profile && !profile?.isAdmin && event.url.pathname.includes('admin')) throw redirect(303, "/attendance")
+	if (event.url.pathname.includes('admin') && (!profile || !profile?.isAdmin)) throw redirect(303, "/attendance")
 
 	return {
 		session,
