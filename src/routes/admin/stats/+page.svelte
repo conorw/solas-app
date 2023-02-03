@@ -102,7 +102,7 @@
 			{#each data.groupedUser as item}
 				<Row>
 					<Cell
-						><a target="_blank" href={`/people/${item?.[1][0]['Person Id']}`}
+						><a href={`/admin/stats/people/${item?.[1][0]['Person Id']}`}
 							>{item?.[1][0]['Person Name']}</a
 						></Cell
 					>
