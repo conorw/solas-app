@@ -1,7 +1,7 @@
 <script lang="ts">
 	import '@carbon/styles/css/styles.css';
 	import '@carbon/charts/styles.css';
-	import DataTable, { Head, Body, Row, Cell, SortValue } from '@smui/data-table';
+	import DataTable, { Head, Body, Row, Cell, Label } from '@smui/data-table';
 
 	import { BarChartSimple } from '@carbon/charts-svelte';
 	import DatePicker from '../../../components/DatePicker.svelte';
@@ -9,11 +9,9 @@
 	import { DateTime } from 'luxon';
 	import type { PageData } from './$types';
 	import { goto } from '$app/navigation';
-	import Tab, { Label } from '@smui/tab';
-	import TabBar from '@smui/tab-bar';
 	import type { attendance } from '$lib/types/rows';
 	export let data: PageData;
-	let active = 'All';
+
 	let stats = data.stats;
 	function groupBy(list, keyGetter, sort = true) {
 		const map = new Map();
