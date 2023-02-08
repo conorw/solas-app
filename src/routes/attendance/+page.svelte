@@ -70,7 +70,7 @@
 			.insert([
 				{
 					'Person Name': `${selectedPerson.FirstName} ${selectedPerson.LastName}`,
-					'Person Id': selectedPerson.Id,
+					'Person Id': selectedPerson['Auto ID'],
 					ServiceName: selectedService.Name,
 					Date: selectedDate
 				}
@@ -84,7 +84,6 @@
 			selectedPerson = undefined;
 		}
 	};
-	console.log(data.service);
 
 	function getPersonName(person: any) {
 		if (!person) return '';

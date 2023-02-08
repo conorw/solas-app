@@ -9,7 +9,7 @@ import type { PageLoad } from './$types';
 export const load: PageLoad = async ({ params, url }) => {
     const [peopleData] = await Promise.all([supabaseClient
         .from('people')
-        .select(`*`).eq(`Id`, params.personId).single()
+        .select(`*`).eq(`Auto ID`, params.personId).single()
     ])
 
     // if (error && status !== 406) throw error

@@ -40,7 +40,8 @@ export const load: PageServerLoad = async ({ params, url }) => {
     const groupedUser = groupBy(stats, (stat: attendance) => stat['Person Id']);
 
     // console.log(groupedUser);
-    const popularService = `${groupedService[0][0]} (${groupedService[0][1].length})`;
+
+    const popularService = groupedService.length? `${groupedService[0][0]} (${groupedService[0][1].length})`: 'No Data';
     return {
         stats,
         fromDate,

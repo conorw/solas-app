@@ -64,7 +64,7 @@
 						<Cell
 							>{item.DateOfBirth ? DateTime.fromISO(item.DateOfBirth).toFormat('yyyy') : ''}</Cell
 						>
-						<Cell><a href={`/people/${item.Id}`}>Edit</a></Cell>
+						<Cell><a href={`/people/${item['Auto ID']}`}>Edit</a></Cell>
 						<!-- 
 				<Cell>{item.username}</Cell>
 				<Cell>{item.email}</Cell>

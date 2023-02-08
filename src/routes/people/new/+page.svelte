@@ -10,7 +10,6 @@
 		Phone: '',
 		'Acupuncture Data': false,
 		Email: '',
-		'Auto ID': null,
 		'Created At': null,
 		'Updated At': null,
 		'Referral Source': null,

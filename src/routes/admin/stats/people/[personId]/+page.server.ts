@@ -29,7 +29,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
             .eq('Person Id', personId),
             supabaseClient
             .from('people')
-            .select(`*`).eq(`Id`, params.personId).single()])
+            .select(`*`).eq(`Auto ID`, params.personId).single()])
 
     const stats = (serviceData?.data || []) as attendance[];
 
