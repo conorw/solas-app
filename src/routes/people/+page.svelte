@@ -1,11 +1,13 @@
 <script lang="ts">
 	import type { person } from '$lib/types/rows';
 	import DataTable, { Head, Body, Row, Cell, Label, SortValue } from '@smui/data-table';
-	import LayoutGrid, {Cell as GridCell} from '@smui/layout-grid';
+	import LayoutGrid, { Cell as GridCell } from '@smui/layout-grid';
 	import Button, { Icon } from '@smui/button';
 	import Textfield from '@smui/textfield';
 	import { DateTime } from 'luxon';
 	import type { PageData } from './$types';
+	import IconButton from '@smui/icon-button/src/IconButton.svelte';
+	import { supabaseClient } from '$lib/supabase';
 	export let data: PageData;
 	let query = '';
 	const handleInput = (e: any) => {
@@ -17,6 +19,31 @@
 		});
 	};
 	let people = data.people;
+
+	async function deletePerson(person: person) {
+		// show a confirmation dialog
+		if (
+			confirm(
+				`Are you sure you want to entirely delete ${person.FirstName} ${person.LastName} (userid: ${person['Auto ID']}) from the system?`
+			)
+		) {
+			// delete the person
+			console.log('Deleting person', { id: person['Auto ID'] });
+			const ret = await supabaseClient
+				.from('people')
+				.delete()
+				.match({ 'Auto ID': person['Auto ID'] });
+			console.log(ret);
+			if (ret.status !== 204) {
+				alert('Error deleting attendance records for this person');
+				return;
+			} else {
+				console.log('Deleted attendance records for this person');
+				// remove the person from the list
+				people = people.filter((p) => p['Auto ID'] !== person['Auto ID']);
+			}
+		}
+	}
 </script>
 
 <LayoutGrid>
@@ -65,6 +92,10 @@
 							>{item.DateOfBirth ? DateTime.fromISO(item.DateOfBirth).toFormat('yyyy') : ''}</Cell
 						>
 						<Cell><a href={`/people/${item['Auto ID']}`}>Edit</a></Cell>
+						<Cell
+							><IconButton class="material-icons" on:click={deletePerson(item)}>delete</IconButton
+							></Cell
+						>
 						<!-- 
 				<Cell>{item.username}</Cell>
 				<Cell>{item.email}</Cell>
