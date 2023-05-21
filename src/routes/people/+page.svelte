@@ -91,11 +91,17 @@
 						<Cell
 							>{item.DateOfBirth ? DateTime.fromISO(item.DateOfBirth).toFormat('yyyy') : ''}</Cell
 						>
+
 						<Cell><a href={`/people/${item['Auto ID']}`}>Edit</a></Cell>
 						<Cell
 							><IconButton class="material-icons" on:click={deletePerson(item)}>delete</IconButton
 							></Cell
 						>
+						{#if data.profile.isAdmin}
+							<Cell>
+								<a href={`/admin/stats/people/${item['Auto ID']}`}>History</a>
+							</Cell>
+						{/if}
 						<!-- 
 				<Cell>{item.username}</Cell>
 				<Cell>{item.email}</Cell>

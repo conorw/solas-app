@@ -19,6 +19,7 @@
 	// mock async request
 
 	const save = async () => {
+		console.log('Saving person', person);
 		supabaseClient
 			.from('people')
 			.upsert(person)
@@ -51,9 +52,10 @@
 				? DateTime.fromISO(person?.DateOfBirth || '').toJSDate()
 				: new Date('1970-01-01')}
 			onChange={(e) => {
-				if (e !== person?.DateOfBirth) {
+				const isoDate = DateTime.fromJSDate(e).toFormat('yyyy-MM-dd');
+				if (isoDate !== person?.DateOfBirth) {
 					console.log(e);
-					person?.DateOfBirth;
+					person.DateOfBirth = isoDate;
 				}
 			}}
 		/>
@@ -86,6 +88,7 @@
 			<Option value="Library">Library</Option>
 			<Option value="Marketing">Marketing</Option>
 			<Option value="Other Organisation">Other Organisation</Option>
+			<Option value="Other Support">Other Support</Option>
 		</Select>
 	</Cell>
 	<Cell>
