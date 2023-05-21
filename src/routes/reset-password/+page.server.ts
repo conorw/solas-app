@@ -6,7 +6,7 @@ export const actions: Actions = {
 	reset: async ({ request, locals }) => {
 		const body = Object.fromEntries(await request.formData())
 
-		const { data, error: err } = await locals.sb.auth.updateUser({
+		const { data, error: err } = await locals.supabase.auth.updateUser({
 			password: body.password as string,
 		})
 

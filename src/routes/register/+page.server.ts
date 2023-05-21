@@ -6,7 +6,7 @@ export const actions: Actions = {
 	register: async ({ request, locals }) => {
 		const body = Object.fromEntries(await request.formData())
 
-		const { data, error: err } = await locals.sb.auth.signUp({
+		const { data, error: err } = await locals.supabase.auth.signUp({
 			email: body.email as string,
 			password: body.password as string,
 		})

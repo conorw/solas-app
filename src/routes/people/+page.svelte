@@ -1,13 +1,12 @@
 <script lang="ts">
 	import type { person } from '$lib/types/rows';
-	import DataTable, { Head, Body, Row, Cell, Label, SortValue } from '@smui/data-table';
+	import DataTable, { Head, Body, Row, Cell, Label } from '@smui/data-table';
 	import LayoutGrid, { Cell as GridCell } from '@smui/layout-grid';
 	import Button, { Icon } from '@smui/button';
 	import Textfield from '@smui/textfield';
 	import { DateTime } from 'luxon';
 	import type { PageData } from './$types';
-	import IconButton from '@smui/icon-button/src/IconButton.svelte';
-	import { supabaseClient } from '$lib/supabase';
+	import IconButton from '@smui/icon-button';
 	export let data: PageData;
 	let query = '';
 	const handleInput = (e: any) => {
@@ -29,7 +28,7 @@
 		) {
 			// delete the person
 			console.log('Deleting person', { id: person['Auto ID'] });
-			const ret = await supabaseClient
+			const ret = await data.supabase
 				.from('people')
 				.delete()
 				.match({ 'Auto ID': person['Auto ID'] });
@@ -94,7 +93,8 @@
 
 						<Cell><a href={`/people/${item['Auto ID']}`}>Edit</a></Cell>
 						<Cell
-							><IconButton class="material-icons" on:click={deletePerson(item)}>delete</IconButton
+							><IconButton class="material-icons" on:click={() => deletePerson(item)}
+								>delete</IconButton
 							></Cell
 						>
 						{#if data.profile.isAdmin}

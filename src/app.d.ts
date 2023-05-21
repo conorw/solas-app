@@ -9,8 +9,8 @@ declare global {
 	declare namespace App {
 		// interface Error {}
 		interface Locals {
-			sb: TypedSupabaseClient
-			session: Session | null
+			supabase: TypedSupabaseClient
+			getSession: () => Promise<Session | null>
 		}
 		interface PageData {
 			session: import("@supabase/supabase-js").Session | null

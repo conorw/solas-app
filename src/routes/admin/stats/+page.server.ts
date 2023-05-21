@@ -2,14 +2,13 @@
 
 
 
-import { supabaseClient } from '$lib/supabase'
 import type { attendance } from '$lib/types/rows';
 import { DateTime } from 'luxon';
 import type { PageServerLoad } from './$types';
 
-function groupBy(list, keyGetter, sort = true) {
+function groupBy(list: any, keyGetter: any, sort = true) {
     const map = new Map();
-    list.forEach((item) => {
+    list.forEach((item: any) => {
         const key = keyGetter(item);
         const collection = map.get(key);
         if (!collection) {
@@ -20,11 +19,11 @@ function groupBy(list, keyGetter, sort = true) {
     });
     return sort ? [...map.entries()].sort((a, b) => b[1].length - a[1].length) : [...map.entries()];
 }
-export const load: PageServerLoad = async ({ params, url }) => {
+export const load: PageServerLoad = async ({ params, url, locals }) => {
     const fromDate: string = url.searchParams.get('fromDate') || DateTime.now().startOf('year').toFormat('yyyy-MM-dd');
     const toDate: string = url.searchParams.get('toDate') || DateTime.now().endOf('year').toFormat('yyyy-MM-dd');
     const [serviceData] = await Promise.all([
-        supabaseClient
+        locals.supabase
             .from('attendance')
             .select(`*`).order('Date', { ascending: true })
             .gte('Date', fromDate)

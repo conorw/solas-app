@@ -2,12 +2,12 @@
 
 
 
-import { supabaseClient } from '$lib/supabase'
 import type { person } from '$lib/types/rows';
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = async ({ params, url }) => {
-    const [peopleData] = await Promise.all([supabaseClient
+export const load: PageLoad = async ({ params, url, parent }) => {
+    const supabase = (await parent()).supabase;
+    const [peopleData] = await Promise.all([supabase
         .from('people')
         .select(`*`).eq(`Auto ID`, params.personId).single()
     ])

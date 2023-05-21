@@ -1,17 +1,15 @@
 
-
-
-
-import { supabaseClient } from '$lib/supabase'
 import type { person } from '$lib/types/rows';
-import { DateTime } from 'luxon';
 import type { PageLoad } from './$types';
+export const load: PageLoad = async (event) => {
 
-export const load: PageLoad = async ({ params, url }) => {
-    const [peopleData] = await Promise.all([supabaseClient
+    const parent = await event.parent();
+    const [peopleData] = await Promise.all([parent.supabase
         .from('people')
         .select(`"Auto ID", "FirstName", "LastName", "DateOfBirth"`),
     ])
+
+    console.log(peopleData)
 
     // if (error && status !== 406) throw error
 

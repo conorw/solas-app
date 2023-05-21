@@ -2,17 +2,18 @@
 
 
 
-import { supabaseClient } from '$lib/supabase'
 import { DateTime } from 'luxon';
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = async ({ params, url }) => {
+export const load: PageLoad = async ({ params, url, data, parent }) => {
     const dt = url.searchParams.get('date') || DateTime.now().toISODate();
-    const [peopleData, serviceData] = await Promise.all([supabaseClient
+
+    const supabase = (await parent()).supabase
+    const [peopleData, serviceData] = await Promise.all([supabase
         .from('people')
         .select(`"Auto ID", "LastName", "FirstName", "DateOfBirth", "Acupuncture Data"`)
         .order('FirstName', { ascending: true }),
-    supabaseClient
+    supabase
         .from('service')
         .select(`Name, "Auto ID"`).eq(`Is Current`, true)
         .order('Name', { ascending: true })])

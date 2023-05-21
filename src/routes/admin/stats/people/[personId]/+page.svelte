@@ -6,6 +6,7 @@
 	import TabBar from '@smui/tab-bar';
 	import type { PageServerData } from './$types';
 	import PersonForm from '../../../../../components/PersonForm.svelte';
+	import { page } from '$app/stores';
 	export let data: PageServerData;
 
 	let stats = data.stats;
@@ -19,7 +20,7 @@
 				<p>{stat['Person Name']}</p>
 			</div>
 		{/each} -->
-		
+
 	<h2>{data.person['Full Name']}</h2>
 	<TabBar tabs={['Stats', 'details']} let:tab bind:active>
 		<!-- Note: the `tab` property is required! -->
@@ -29,11 +30,10 @@
 	</TabBar>
 
 	{#if active === 'Stats'}
-	
-	<h2>Total Sessions: {data.stats.length}</h2>
-	<h2>Most Popular Service: {data.popularService}</h2>
-	<h2>Latest Session: {data.stats[data.stats.length - 1].Date}</h2>
-	<h2>First Session: {data.stats[0].Date}</h2>
+		<h2>Total Sessions: {data.stats.length}</h2>
+		<h2>Most Popular Service: {data.popularService}</h2>
+		<h2>Latest Session: {data.stats[data.stats.length - 1].Date}</h2>
+		<h2>First Session: {data.stats[0].Date}</h2>
 		<DataTable table$aria-label="Attendance list">
 			<Head>
 				<Row>
@@ -80,6 +80,10 @@
 		</DataTable>
 	{/if}
 	{#if active === 'details'}
-		<PersonForm onSave={() => history.back()} person={data?.person} />
+		<PersonForm
+			supabase={$page.data.supabase}
+			onSave={() => history.back()}
+			person={data?.person}
+		/>
 	{/if}
 {/if}

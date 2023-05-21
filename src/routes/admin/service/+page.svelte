@@ -1,14 +1,12 @@
 <script lang="ts">
 	import type { service } from '$lib/types/rows';
-	import DataTable, { Head, Body, Row, Cell, Label, SortValue } from '@smui/data-table';
+	import DataTable, { Head, Body, Row, Cell, Label } from '@smui/data-table';
 	import FormField from '@smui/form-field';
 	import LayoutGrid, { Cell as GridCell } from '@smui/layout-grid';
 	import Button, { Icon } from '@smui/button';
 	import Textfield from '@smui/textfield';
-	import { DateTime } from 'luxon';
 	import type { PageData } from './$types';
 	import Checkbox from '@smui/checkbox';
-	import { supabaseClient } from '$lib/supabase';
 	export let data: PageData;
 	let query = '';
 	const handleInput = (e: any) => {
@@ -67,7 +65,7 @@
 							<Checkbox
 								on:change={async () => {
 									console.log('change', item['Is Current']);
-									const ret = await supabaseClient
+									const ret = await data.supabase
 										.from('service')
 										.update({ 'Is Current': item['Is Current'] })
 										.eq('Auto ID', item['Auto ID']);
@@ -107,7 +105,7 @@
 		<Button
 			on:click={() => {
 				console.log('clicked', newItem);
-				supabaseClient
+				data.supabase
 					.from('service')
 					.upsert([newItem])
 					.select('*')

@@ -3,7 +3,6 @@
 	import LayoutGrid, { Cell } from '@smui/layout-grid';
 	import Snackbar, { Actions } from '@smui/snackbar';
 	import IconButton from '@smui/icon-button';
-	import Label from '@smui/list/src/Label.svelte';
 	import Button, { Icon } from '@smui/button';
 	import Select, { Option } from '@smui/select';
 	import Textfield from '@smui/textfield';
@@ -13,14 +12,15 @@
 	import FormField from '@smui/form-field';
 	let snackbar: Snackbar;
 	let text = 'Saved.';
-	import { supabaseClient } from '$lib/supabase';
+	import { Label } from '@smui/list';
 	export let person: person;
 	export let onSave: any;
+	export let supabase: any;
 	// mock async request
 
 	const save = async () => {
 		console.log('Saving person', person);
-		supabaseClient
+		supabase
 			.from('people')
 			.upsert(person)
 			.then((ret) => {

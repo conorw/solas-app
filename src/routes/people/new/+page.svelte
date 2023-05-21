@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import type { person } from '$lib/types/rows';
 	import PersonForm from '../../../components/PersonForm.svelte';
 
@@ -36,4 +37,4 @@
 	};
 </script>
 
-<PersonForm {person} onSave={()=>history.back()} />
+<PersonForm supabase={$page.data.supabase} {person} onSave={() => history.back()} />

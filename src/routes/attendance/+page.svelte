@@ -3,16 +3,16 @@
 	import Autocomplete from '@smui-extra/autocomplete';
 	import Select, { Option } from '@smui/select';
 
-	import List, { Item, Meta, Text, PrimaryText, SecondaryText } from '@smui/list';
+	import { PrimaryText } from '@smui/list';
 	import IconButton from '@smui/icon-button';
 	import Button, { Label } from '@smui/button';
 	import { page } from '$app/stores';
 	import LayoutGrid, { Cell } from '@smui/layout-grid';
-	import Card, { Content, PrimaryAction, Actions, ActionButtons, ActionIcons } from '@smui/card';
+	import Card, { Content } from '@smui/card';
 	import { DateTime } from 'luxon';
 	import DatePicker from '../../components/DatePicker.svelte';
 	import { goto } from '$app/navigation';
-	import { supabaseClient } from '$lib/supabase';
+
 	export let data: PageData;
 
 	let selectedPerson: any | undefined = undefined;
@@ -21,7 +21,7 @@
 	let attendance: any = [];
 	const attendanceFields = `"Auto ID", "Person Name" , "ServiceName"`;
 	const updateAttendance = async (date: any) => {
-		const attendanceData = await supabaseClient
+		const attendanceData = await data.supabase
 			.from('attendance')
 			.select(attendanceFields)
 			.eq(`Date`, `${date}`)
@@ -31,7 +31,7 @@
 	updateAttendance(data.date);
 
 	const deleteAttendance = async (id: string) => {
-		const ret = await supabaseClient.from('attendance').delete().eq('Auto ID', id);
+		const ret = await data.supabase.from('attendance').delete().eq('Auto ID', id);
 		if (ret.error) {
 			console.log(ret.error);
 		} else {
@@ -41,7 +41,7 @@
 	};
 
 	const updateService = async (attend: any) => {
-		const ret = await supabaseClient
+		const ret = await data.supabase
 			.from('attendance')
 			.update({ ServiceName: attend.ServiceName })
 			.eq('Auto ID', attend['Auto ID']);
@@ -65,7 +65,7 @@
 			alert('Please select a person, date and service');
 			return;
 		}
-		const ret = await supabaseClient
+		const ret = await data.supabase
 			.from('attendance')
 			.insert([
 				{

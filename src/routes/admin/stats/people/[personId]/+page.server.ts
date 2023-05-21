@@ -1,8 +1,6 @@
 
 
 
-
-import { supabaseClient } from '$lib/supabase'
 import type { attendance, person } from '$lib/types/rows';
 import { DateTime } from 'luxon';
 import type { PageServerLoad } from './$types';
@@ -20,14 +18,14 @@ function groupBy(list, keyGetter, sort = true) {
     });
     return sort ? [...map.entries()].sort((a, b) => b[1].length - a[1].length) : [...map.entries()];
 }
-export const load: PageServerLoad = async ({ params, url }) => {
+export const load: PageServerLoad = async ({ params, url, locals }) => {
     const personId: string = params.personId;
     const [serviceData, peopleData] = await Promise.all([
-        supabaseClient
+        locals.supabase
             .from('attendance')
             .select(`*`).order('Date', { ascending: true })
             .eq('Person Id', personId),
-            supabaseClient
+        locals.supabase
             .from('people')
             .select(`*`).eq(`Auto ID`, params.personId).single()])
 

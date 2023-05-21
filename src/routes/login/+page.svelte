@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Label from '@smui/list/src/Label.svelte';
 	import Button, { Icon } from '@smui/button';
 	import FormField from '@smui/form-field';
 	import Textfield from '@smui/textfield';
