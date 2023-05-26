@@ -20,7 +20,9 @@
 	let selectedDate: any = new Date(data.date) || new Date();
 	let attendance: any = [];
 	const attendanceFields = `"Auto ID", "Person Name" , "ServiceName"`;
+
 	const updateAttendance = async (date: any) => {
+		console.log(data);
 		const attendanceData = await data.supabase
 			.from('attendance')
 			.select(attendanceFields)
@@ -72,7 +74,7 @@
 					'Person Name': `${selectedPerson.FirstName} ${selectedPerson.LastName}`,
 					'Person Id': selectedPerson['Auto ID'],
 					ServiceName: selectedService.Name,
-					Date: selectedDate
+					Date: DateTime.fromJSDate(selectedDate).toFormat('yyyy-MM-dd')
 				}
 			])
 			.select(attendanceFields);
@@ -157,37 +159,39 @@
 				DateTime.DATE_MED_WITH_WEEKDAY
 			)}
 		</h2>
-		<LayoutGrid>
-			{#each attendance as attend}
-				<Cell>
-					<!-- <IconButton class="material-icons" on:click={() => {}}>delete</IconButton>
+		{#if attendance?.length}
+			<LayoutGrid>
+				{#each attendance as attend}
+					<Cell>
+						<!-- <IconButton class="material-icons" on:click={() => {}}>delete</IconButton>
 							<Text>
 								<PrimaryText>{attend['Person Name']}</PrimaryText>
 								<SecondaryText>{attend['ServiceName']}</SecondaryText>
 							</Text> -->
-					<Card>
-						<Content
-							><PrimaryText
-								>{attend['Person Name']}
-								<IconButton
-									class="material-icons"
-									on:click={() => deleteAttendance(attend['Auto ID'])}>delete</IconButton
-								></PrimaryText
-							>
+						<Card>
+							<Content
+								><PrimaryText
+									>{attend['Person Name']}
+									<IconButton
+										class="material-icons"
+										on:click={() => deleteAttendance(attend['Auto ID'])}>delete</IconButton
+									></PrimaryText
+								>
 
-							<Select
-								on:SMUISelect:change={() => updateService(attend)}
-								bind:value={attend['ServiceName']}
-							>
-								{#each data?.service as service}
-									<Option value={service.Name}>{service.Name}</Option>
-								{/each}
-							</Select>
-						</Content>
-					</Card>
-				</Cell>
-			{/each}
-		</LayoutGrid>
+								<Select
+									on:SMUISelect:change={() => updateService(attend)}
+									bind:value={attend['ServiceName']}
+								>
+									{#each data?.service as service}
+										<Option value={service.Name}>{service.Name}</Option>
+									{/each}
+								</Select>
+							</Content>
+						</Card>
+					</Cell>
+				{/each}
+			</LayoutGrid>
+		{/if}
 	</Cell>
 </LayoutGrid>
 
