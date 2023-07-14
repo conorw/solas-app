@@ -28,7 +28,12 @@
 			.select(attendanceFields)
 			.eq(`Date`, `${date}`)
 			.order(`"Person Name"`, { ascending: true });
-		attendance = attendanceData.data;
+		attendance = attendanceData.data?.map((a: any) => {
+			return {
+				...a,
+				'Person Name': capitalizeFirstLetter(a['Person Name'])
+			};
+		});
 	};
 	updateAttendance(data.date);
 
@@ -87,12 +92,17 @@
 		}
 	};
 
+	function capitalizeFirstLetter(str: string) {
+		return str?.charAt(0).toUpperCase() + str?.slice(1);
+	}
 	function getPersonName(person: any) {
 		if (!person) return '';
 		return person
-			? `${person.FirstName} ${person.LastName || ''} (b.${DateTime.fromISO(
-					person.DateOfBirth
-			  ).toFormat('yyyy')}) (Accupuncture:${person['Acupuncture Data'] || false})`
+			? `${capitalizeFirstLetter(person.FirstName)} ${
+					capitalizeFirstLetter(person.LastName) || ''
+			  } (b.${DateTime.fromISO(person.DateOfBirth).toFormat('yyyy')}) (Accupuncture:${
+					person['Acupuncture Data'] || false
+			  })`
 			: '';
 	}
 	async function searchItems(input: string) {
