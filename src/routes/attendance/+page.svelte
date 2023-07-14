@@ -22,7 +22,6 @@
 	const attendanceFields = `"Auto ID", "Person Name" , "ServiceName"`;
 
 	const updateAttendance = async (date: any) => {
-		console.log(data);
 		const attendanceData = await data.supabase
 			.from('attendance')
 			.select(attendanceFields)
@@ -55,7 +54,6 @@
 		if (ret.error) {
 			console.log(ret.error);
 		} else {
-			console.log(ret.data);
 			attendance = attendance.map((a: any) => {
 				if (a['Auto ID'] === attend['Auto ID']) {
 					return attend;
@@ -93,7 +91,10 @@
 	};
 
 	function capitalizeFirstLetter(str: string) {
-		return str?.charAt(0).toUpperCase() + str?.slice(1);
+		// capitatize first letter of each word in string and return
+		return str?.replace(/\w\S*/g, function (txt) {
+			return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+		});
 	}
 	function getPersonName(person: any) {
 		if (!person) return '';
@@ -106,7 +107,6 @@
 			: '';
 	}
 	async function searchItems(input: string) {
-		console.log(input);
 		if (!input || input.length < 2) {
 			return [];
 		}
@@ -122,7 +122,6 @@
 			onChange={(e) => {
 				// selectedDate = e;
 				if (e !== selectedDate) {
-					console.log(e);
 					selectedDate = e;
 					$page.url.searchParams.set('date', DateTime.fromJSDate(e).toFormat('yyyy-MM-dd'));
 					goto($page.url.pathname + '?' + $page.url.searchParams.toString());
