@@ -23,7 +23,7 @@ export const load: PageServerLoad = async ({ params, url, locals }) => {
     const [serviceData, peopleData] = await Promise.all([
         locals.supabase
             .from('attendance')
-            .select(`*`).order('Date', { ascending: true })
+            .select(`*`).order('Date', { ascending: false })
             .eq('Person Id', personId),
         locals.supabase
             .from('people')
