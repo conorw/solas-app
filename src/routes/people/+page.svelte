@@ -10,7 +10,6 @@
 	export let data: PageData;
 	let query = '';
 	const handleInput = (e: any) => {
-		console.log('handleInput', e);
 		query = e.target.value;
 		const queryVal = e.target.value.toLowerCase();
 		people = data.people.filter((p: person) => {
