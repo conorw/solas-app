@@ -83,12 +83,12 @@
 	<Cell>
 		<Select label="How did you Hear about Solas?" bind:value={person['Referral Source']}>
 			<Option value="" />
+			<Option value="Personal Recommendation">Personal Recommendation</Option>
+			<Option value="Word Of Mouth">Word Of Mouth</Option>
 			<Option value="GP">GP</Option>
-			<Option value="GP Practice">GP Practice</Option>
-			<Option value="Library">Library</Option>
-			<Option value="Marketing">Marketing</Option>
 			<Option value="Other Organisation">Other Organisation</Option>
-			<Option value="Other Support">Other Support</Option>
+			<Option value="Marketing">Marketing</Option>
+			<Option value="Other">Other (Please Specify)</Option>
 		</Select>
 	</Cell>
 	<Cell>
@@ -96,9 +96,22 @@
 			<Option value="" />
 			<Option value="BCW">BCW</Option>
 			<Option value="CAT">CAT</Option>
-			<Option value="CCGBC">CCGBC</Option>
-			<Option value="CCGBG">CCGBG</Option>
+			<Option value="CCGBD">CCGBD</Option>
 			<Option value="CMHT">CMHT</Option>
+			<Option value="MHP">MHP</Option>
+			<Option value="GP">GP</Option>
+			<Option value="Mindwise">Mindwise</Option>
+			<Option value="Inspire">Inspire</Option>
+			<Option value="District Nurse">District Nurse</Option>
+			<Option value="Health Visitor">Health Visitor</Option>
+			<Option value="Social Worker">Social Worker</Option>
+			<Option value="Livingwell Moyle">Livingwell Moyle</Option>
+			<Option value="Good Morning Ballycastle">Good Morning Ballycastle</Option>
+			<Option value="Alzhiemer’s Society">Alzhiemer’s Society</Option>
+			<Option value="Day Services LD">Day Services LD</Option>
+			<Option value="Extern">Extern</Option>
+			<Option value="Carer’s Hub">Carer’s Hub</Option>
+			<Option value="Other (please specify)">Other (please specify)</Option>
 		</Select>
 	</Cell>
 	<Cell>
@@ -134,6 +147,7 @@
 			<Select label="Ethnic Origin" bind:value={person['Ethnic Origin']}>
 				<Option value="" />
 				<Option value="Black">Black</Option>
+				<Option value="White">White</Option>
 				<Option value="Chinese">Chinese</Option>
 				<Option value="Indian">Indian</Option>
 				<Option value="Irish Traveller">Irish Traveller</Option>
@@ -155,7 +169,7 @@
 				<Option value="Civil Partnership">Civil Partnership</Option>
 				<Option value="Co-habiting">Co-habiting</Option>
 				<Option value="Married">Married</Option>
-				<Option value="Single or Divorced">Single or Divorced</Option>
+				<Option value="Divorced">Divorced</Option>
 				<Option value="Single">Single</Option>
 				<Option value="Widowed">Widowed</Option>
 			</Select>
@@ -174,7 +188,7 @@
 		</Cell>
 	{/if}
 </LayoutGrid>
-<h2>Accupuncture data</h2>
+<h2>Acupuncture data</h2>
 <LayoutGrid>
 	<Cell>
 		<FormField>

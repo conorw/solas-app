@@ -101,7 +101,7 @@
 		return person
 			? `${capitalizeFirstLetter(person.FirstName)} ${
 					capitalizeFirstLetter(person.LastName) || ''
-			  } (b.${DateTime.fromISO(person.DateOfBirth).toFormat('yyyy')}) (Accupuncture:${
+			  } (b.${DateTime.fromISO(person.DateOfBirth).toFormat('yyyy')}) (Acupuncture:${
 					person['Acupuncture Data'] || false
 			  })`
 			: '';
