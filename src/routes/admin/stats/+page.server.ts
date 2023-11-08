@@ -41,6 +41,7 @@ export const load: PageServerLoad = async ({ params, url, locals }) => {
     // console.log(groupedUser);
 
     const popularService = groupedService.length ? `${groupedService[0][0]} (${groupedService[0][1].length})` : 'No Data';
+
     return {
         stats,
         fromDate,

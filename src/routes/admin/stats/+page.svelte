@@ -138,7 +138,12 @@
 		<Body>
 			{#each data.groupedService as item}
 				<Row>
-					<Cell>{item?.[0]}</Cell>
+					<Cell
+						><a
+							href={`/admin/stats/services/${item?.[0]}?fromDate=${data.fromDate}&toDate=${data.toDate}`}
+							>{item?.[0]}</a
+						></Cell
+					>
 					<Cell>
 						{item?.[1].length}
 					</Cell>
