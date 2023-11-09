@@ -41,7 +41,6 @@
 		if (ret.error) {
 			console.log(ret.error);
 		} else {
-			console.log(ret.data);
 			attendance = attendance.filter((a: any) => a['Auto ID'] !== id);
 		}
 	};
@@ -65,7 +64,6 @@
 	};
 
 	const addAttendee = async () => {
-		console.log('adding', { selectedPerson, selectedDate, selectedService });
 		if (!selectedPerson || !selectedDate || !selectedService) {
 			alert('Please select a person, date and service');
 			return;
@@ -84,7 +82,6 @@
 		if (ret.error) {
 			console.log(ret.error);
 		} else {
-			console.log(ret.data);
 			updateAttendance(DateTime.fromJSDate(selectedDate).toFormat('yyyy-MM-dd'));
 			selectedPerson = undefined;
 		}

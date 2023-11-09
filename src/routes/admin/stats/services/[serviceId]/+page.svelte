@@ -1,10 +1,10 @@
 <script lang="ts">
 	import DataTable, { Head, Body, Row, Cell } from '@smui/data-table';
-	import Tab, { Label } from '@smui/tab';
-	import TabBar from '@smui/tab-bar';
+	import { Label } from '@smui/tab';
+	import Button from '@smui/button';
 	import type { PageServerData } from './$types';
-	import PersonForm from '../../../../../components/PersonForm.svelte';
 	import { page } from '$app/stores';
+	import { exportData } from '$lib/types/utils';
 	export let data: PageServerData;
 
 	let stats = data.stats;
@@ -14,7 +14,25 @@
 	<h2>{$page?.params?.serviceId}</h2>
 	<h3>From date: {data.fromDate}</h3>
 	<h3>To date: {data.toDate}</h3>
-	<h2>Total Sessions: {data.stats.length}</h2>
+	<h4>Total Sessions: {data.stats.length}</h4>
+	<Button
+		on:click={async () => {
+			const peopleData = await data.groupedUser;
+			// flatten the data first
+			const flatData = peopleData.map((item) => {
+				return {
+					name: item[0],
+					count: item[1].length,
+					...item[1][0].people
+				};
+			});
+			exportData(flatData, `${$page?.params?.serviceId}.csv`);
+		}}
+		variant="unelevated"
+		class="button-shaped-round"
+	>
+		<Label>Export Data</Label>
+	</Button>
 	<DataTable table$aria-label="Attendance list">
 		<Head>
 			<Row>
@@ -26,6 +44,12 @@
 				</Cell>
 				<Cell columnId="email">
 					<Label>Email</Label>
+				</Cell>
+				<Cell columnId="phone">
+					<Label>Phone</Label>
+				</Cell>
+				<Cell columnId="opt">
+					<Label>Opt Out</Label>
 				</Cell>
 			</Row>
 		</Head>
@@ -40,6 +64,12 @@
 					</Cell>
 					<Cell>
 						{item[1][0].people?.Email}
+					</Cell>
+					<Cell>
+						{item[1][0].people['Phone']}
+					</Cell>
+					<Cell>
+						{item[1][0].people['Marketing Opt Out']}
 					</Cell>
 				</Row>
 			{/each}

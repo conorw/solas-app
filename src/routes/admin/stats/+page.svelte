@@ -10,44 +10,10 @@
 	import { DateTime } from 'luxon';
 	import type { PageServerData } from './$types';
 	import { goto } from '$app/navigation';
+	import { exportData } from '$lib/types/utils';
 	export let data: PageServerData;
 
 	let stats = data.stats;
-	function convertToCSV(objArray: any) {
-		var array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
-		var str = '';
-
-		for (var i = 0; i < array.length; i++) {
-			var line = '';
-			for (var index in array[i]) {
-				if (line != '') line += ',';
-
-				line += array[i][index];
-			}
-
-			str += line + '\r\n';
-		}
-
-		return str;
-	}
-	function exportData(dataObj: any[], fileName: string) {
-		// Convert Object to JSON
-		var jsonObject = JSON.stringify(dataObj);
-
-		const headers = Object.keys(dataObj[0]);
-
-		var csv = convertToCSV(jsonObject);
-		csv = headers.join(',') + '\r\n' + csv;
-		let csvContent = 'data:text/csv;charset=utf-8,' + csv;
-
-		var encodedUri = encodeURI(csvContent);
-		var link = document.createElement('a');
-		link.setAttribute('href', encodedUri);
-		link.setAttribute('download', fileName);
-		document.body.appendChild(link); // Required for FF
-
-		link.click(); // This will download the data file named "my_data.csv".
-	}
 </script>
 
 <DatePicker
@@ -68,7 +34,6 @@
 	onChange={(e) => {
 		// selectedDate = e;
 		if (DateTime.fromJSDate(e).toFormat('yyyy-MM-dd') !== data.toDate) {
-			console.log(e);
 			data.toDate = DateTime.fromJSDate(e).toFormat('yyyy-MM-dd');
 			$page.url.searchParams.set('toDate', data.toDate);
 			goto($page.url.pathname + '?' + $page.url.searchParams.toString(), { invalidateAll: true });
@@ -79,7 +44,6 @@
 
 <Button
 	on:click={async () => {
-		console.log($page.data.supabase);
 		const peopleData = await $page.data.supabase.from('people').select('*');
 
 		exportData(peopleData.data, 'people.csv');

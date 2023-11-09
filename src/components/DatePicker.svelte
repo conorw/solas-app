@@ -16,11 +16,9 @@
 
 	let store: any;
 
-    export let selected: Date;
-
-    console.log('selected', selected);
+	export let selected: Date;
 
 	$: $store?.selected ? onChange($store?.selected) : () => {};
 </script>
 
-<Datepicker format={'DD/MM/YYYY'} selected={selected} bind:store />
+<Datepicker format={'DD/MM/YYYY'} {selected} bind:store />

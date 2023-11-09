@@ -26,17 +26,14 @@
 			)
 		) {
 			// delete the person
-			console.log('Deleting person', { id: person['Auto ID'] });
 			const ret = await data.supabase
 				.from('people')
 				.delete()
 				.match({ 'Auto ID': person['Auto ID'] });
-			console.log(ret);
 			if (ret.status !== 204) {
 				alert('Error deleting attendance records for this person');
 				return;
 			} else {
-				console.log('Deleted attendance records for this person');
 				// remove the person from the list
 				people = people.filter((p) => p['Auto ID'] !== person['Auto ID']);
 			}

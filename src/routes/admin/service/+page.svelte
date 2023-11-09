@@ -64,15 +64,12 @@
 						<Cell>
 							<Checkbox
 								on:change={async () => {
-									console.log('change', item['Is Current']);
 									const ret = await data.supabase
 										.from('service')
 										.update({ 'Is Current': item['Is Current'] })
 										.eq('Auto ID', item['Auto ID']);
 									if (ret.error) {
 										console.log(ret.error);
-									} else {
-										console.log(ret.data);
 									}
 								}}
 								bind:checked={item['Is Current']}
@@ -104,17 +101,14 @@
 		</Button>
 		<Button
 			on:click={() => {
-				console.log('clicked', newItem);
 				data.supabase
 					.from('service')
 					.upsert([newItem])
 					.select('*')
 					.then((ret) => {
-						console.log(ret);
 						if (ret.error) {
 							console.log(ret.error);
 						} else {
-							console.log(ret.data);
 							service.push(ret.data[0]);
 							service = [...service];
 							newItem = {

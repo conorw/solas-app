@@ -19,7 +19,6 @@
 	// mock async request
 
 	const save = async () => {
-		console.log('Saving person', person);
 		supabase
 			.from('people')
 			.upsert(person)
@@ -31,7 +30,6 @@
 				} else {
 					text = 'Saved Successfully';
 					snackbar?.open();
-					console.log(ret.data);
 					onSave();
 				}
 			});

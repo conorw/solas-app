@@ -20,7 +20,6 @@ export const load: PageLoad = async ({ params, url, data, parent }) => {
 
     // if (error && status !== 406) throw error
 
-    console.log(peopleData, serviceData)
     return {
         people: peopleData?.data || [],
         service: serviceData?.data || [], date: dt

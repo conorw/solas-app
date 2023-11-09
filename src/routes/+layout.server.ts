@@ -4,11 +4,10 @@ import { redirect } from "@sveltejs/kit"
 export const load: LayoutServerLoad = async ({ locals, url }) => {
 
 	const session = await locals.getSession()
-	console.log('SESSION', { user: session?.user, url: url.pathname })
 	if (!session?.user && (!url.pathname.includes('login') && !url.pathname.includes('reset-password'))) throw redirect(303, "/login")
 	if (url.pathname === '/') throw redirect(302, "/attendance")
 	const profile = await (await locals.supabase.from('profiles').select('*').eq('id', session?.user?.id).single()).data;
-	console.log('PROFILE', profile)
+
 	if (url.pathname.includes('admin') && (!profile || !profile?.isAdmin)) throw redirect(303, "/attendance")
 
 	return {
