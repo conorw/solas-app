@@ -1,0 +1,14 @@
+name: CRON Jobs
+
+on:
+  schedule:
+    # Runs "at on the hour" (see https://crontab.guru)
+    - cron: '0 * * * *'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping app
+        # Hit the webhook endpoint to update expired posts
+        run: curl https://app.solaswellbeing.org.uk/attendance
