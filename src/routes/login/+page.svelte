@@ -6,8 +6,8 @@
 	let password = '';
 	const submitForm = (event: any) => {
 		let formData = new FormData();
-		formData.append('email', email);
-		formData.append('password', password);
+		formData.append('email', email.trim());
+		formData.append('password', password.trim());
 		fetch('?/login', {
 			method: 'POST',
 			body: formData
