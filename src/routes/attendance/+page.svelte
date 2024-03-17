@@ -2,16 +2,18 @@
 	import type { PageData } from './$types';
 	import Autocomplete from '@smui-extra/autocomplete';
 	import Select, { Option } from '@smui/select';
-
-	import { PrimaryText } from '@smui/list';
+	import Textfield from '@smui/textfield';
+	import List, { Item, PrimaryText } from '@smui/list';
 	import IconButton from '@smui/icon-button';
 	import Button, { Label } from '@smui/button';
 	import { page } from '$app/stores';
 	import LayoutGrid, { Cell } from '@smui/layout-grid';
-	import Card, { Content } from '@smui/card';
+	import Card, { Actions, Content } from '@smui/card';
 	import { DateTime } from 'luxon';
 	import DatePicker from '../../components/DatePicker.svelte';
 	import { goto } from '$app/navigation';
+	import Dialog, { InitialFocus } from '@smui/dialog';
+	import { Title } from '@smui/top-app-bar';
 
 	export let data: PageData;
 
@@ -19,8 +21,33 @@
 	let selectedService: any | undefined = undefined;
 	let selectedDate: any = new Date(data.date) || new Date();
 	let attendance: any = [];
-	const attendanceFields = `"Auto ID", "Person Name" , "ServiceName"`;
+	let open = false;
+	let participantCount = 10;
+	let selectionIndex = -1;
+	let selected: any = null;
+	const attendanceFields = `"Auto ID", "Person Name" , "ServiceName", Multi, TotalAttendees`;
 
+	async function addMultiAttendee(service: any, count: number) {
+		const ret = await data.supabase
+			.from('attendance')
+			.insert([
+				{
+					'Person Name': `Anonymous Attendee`,
+					'Person Id': 2830,
+					ServiceName: service.Name,
+					Multi: true,
+					TotalAttendees: count,
+					Date: DateTime.fromJSDate(selectedDate).toFormat('yyyy-MM-dd')
+				}
+			])
+			.select(attendanceFields);
+		if (ret.error) {
+			console.log(ret.error);
+		} else {
+			updateAttendance(DateTime.fromJSDate(selectedDate).toFormat('yyyy-MM-dd'));
+			selectedPerson = undefined;
+		}
+	}
 	const updateAttendance = async (date: any) => {
 		const attendanceData = await data.supabase
 			.from('attendance')
@@ -45,6 +72,23 @@
 		}
 	};
 
+	const updateAttendeeNumber = async (attend: any) => {
+		const ret = await data.supabase
+			.from('attendance')
+			.update({ TotalAttendees: attend.TotalAttendees })
+			.eq('Auto ID', attend['Auto ID']);
+		if (ret.error) {
+			console.log(ret.error);
+		} else {
+			attendance = attendance.map((a: any) => {
+				if (a['Auto ID'] === attend['Auto ID']) {
+					return attend;
+				} else {
+					return a;
+				}
+			});
+		}
+	};
 	const updateService = async (attend: any) => {
 		const ret = await data.supabase
 			.from('attendance')
@@ -144,7 +188,7 @@
 		<div>
 			<Autocomplete
 				style="width: 80%"
-				options={data?.service}
+				options={data?.service?.filter((s) => !s['Multi'])}
 				getOptionLabel={(service) => (service ? `${service.Name || ''}` : '')}
 				bind:value={selectedService}
 				label="Service"
@@ -155,8 +199,16 @@
 				<Label>Add Attendee To List ></Label>
 			</Button>
 		</div>
+		<hr />
 		<div>
 			If user not found. <Button href="/people/new">Add New user</Button>
+		</div>
+		<div style="margin-top:40%">
+			Add event with many anonymous users? <Button
+				on:click={() => {
+					open = true;
+				}}>Add multi event</Button
+			>
 		</div>
 	</Cell>
 	<Cell span={8}>
@@ -175,23 +227,37 @@
 								<SecondaryText>{attend['ServiceName']}</SecondaryText>
 							</Text> -->
 						<Card>
-							<Content
-								><PrimaryText
-									>{attend['Person Name']}
-									<IconButton
-										class="material-icons"
-										on:click={() => deleteAttendance(attend['Auto ID'])}>delete</IconButton
-									></PrimaryText
-								>
-
-								<Select
-									on:SMUISelect:change={() => updateService(attend)}
-									bind:value={attend['ServiceName']}
-								>
-									{#each data?.service as service}
-										<Option value={service.Name}>{service.Name}</Option>
-									{/each}
-								</Select>
+							<Content>
+								{#if attend.Multi}
+									<PrimaryText
+										>{attend['ServiceName']} (Multi)<IconButton
+											class="material-icons"
+											on:click={() => deleteAttendance(attend['Auto ID'])}>delete</IconButton
+										></PrimaryText
+									>
+									<Textfield
+										type="number"
+										on:change={() => updateAttendeeNumber(attend)}
+										bind:value={attend['TotalAttendees']}
+										label="Number of participants"
+									/>
+								{:else}
+									<PrimaryText
+										>{attend['Person Name']}
+										<IconButton
+											class="material-icons"
+											on:click={() => deleteAttendance(attend['Auto ID'])}>delete</IconButton
+										></PrimaryText
+									>
+									<Select
+										on:SMUISelect:change={() => updateService(attend)}
+										bind:value={attend['ServiceName']}
+									>
+										{#each data?.service as service}
+											<Option value={service.Name}>{service.Name}</Option>
+										{/each}
+									</Select>
+								{/if}
 							</Content>
 						</Card>
 					</Cell>
@@ -200,6 +266,53 @@
 		{/if}
 	</Cell>
 </LayoutGrid>
+<Dialog
+	bind:open
+	selection
+	aria-labelledby="list-selection-title"
+	aria-describedby="list-selection-content"
+>
+	<Title id="list-selection-title">Choose event</Title>
+
+	<Content id="list-selection-content">
+		<Textfield type="number" bind:value={participantCount} label="Number of participants" />
+		<List singleSelection selectedIndex={selectionIndex}>
+			{#each data?.service?.filter((t) => t.Multi) as service, i}
+				<Item
+					on:SMUI:action={() => {
+						selectionIndex = i;
+						selected = service;
+					}}
+					selected={selectionIndex === i}
+				>
+					<PrimaryText>{service.Name}</PrimaryText>
+				</Item>
+			{/each}
+		</List>
+	</Content>
+	<Actions>
+		<Button
+			on:click={() => {
+				open = false;
+			}}
+		>
+			<Label>Cancel</Label>
+		</Button>
+		<Button
+			on:click={() => {
+				if (selected && participantCount > 0) {
+					addMultiAttendee(selected, participantCount);
+					open = false;
+				} else {
+					alert('Please select a service');
+				}
+			}}
+			action="accept"
+		>
+			<Label>Add</Label>
+		</Button>
+	</Actions>
+</Dialog>
 
 <style lang="scss">
 	:global {

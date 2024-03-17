@@ -55,6 +55,9 @@
 					<Cell columnId="firstname">
 						<Label>Is Current</Label>
 					</Cell>
+					<Cell columnId="multi">
+						<Label>Is Bulk Add Event?</Label>
+					</Cell>
 				</Row>
 			</Head>
 			<Body>
@@ -75,6 +78,20 @@
 								bind:checked={item['Is Current']}
 							/>
 						</Cell>
+						<Cell>
+							<Checkbox
+								on:change={async () => {
+									const ret = await data.supabase
+										.from('service')
+										.update({ Multi: item['Multi'] })
+										.eq('Auto ID', item['Auto ID']);
+									if (ret.error) {
+										console.log(ret.error);
+									}
+								}}
+								bind:checked={item['Multi']}
+							/>
+						</Cell>
 						<!-- 
         <Cell>{item.username}</Cell>
         <Cell>{item.email}</Cell>
@@ -93,6 +110,10 @@
 		<FormField>
 			<Checkbox bind:checked={newItem['Is Current']} />
 			<span slot="label">is Current?</span>
+		</FormField>
+		<FormField>
+			<Checkbox bind:checked={newItem['Multi']} />
+			<span slot="label">Is Bulk Event?</span>
 		</FormField>
 	</Content>
 	<Actions>
