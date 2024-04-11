@@ -121,6 +121,18 @@
 			<span slot="label">Marketing Opt Out</span>
 		</FormField>
 	</Cell>
+	<Cell>
+		<FormField>
+			<Checkbox bind:checked={person.Carer} />
+			<span slot="label">Carer?</span>
+		</FormField>
+	</Cell>
+	<Cell>
+		<FormField>
+			<Checkbox bind:checked={person.Disability} />
+			<span slot="label">Disability?</span>
+		</FormField>
+	</Cell>
 </LayoutGrid>
 <h2>Equality Data</h2>
 <LayoutGrid>
@@ -171,18 +183,6 @@
 				<Option value="Single">Single</Option>
 				<Option value="Widowed">Widowed</Option>
 			</Select>
-		</Cell>
-		<Cell>
-			<FormField>
-				<Checkbox bind:checked={person.Carer} />
-				<span slot="label">Carer?</span>
-			</FormField>
-		</Cell>
-		<Cell>
-			<FormField>
-				<Checkbox bind:checked={person.Disability} />
-				<span slot="label">Disability?</span>
-			</FormField>
 		</Cell>
 	{/if}
 </LayoutGrid>

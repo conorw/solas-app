@@ -23,7 +23,7 @@ export const load: PageServerLoad = async ({ params, url, locals }) => {
 	const [serviceData] = await Promise.all([
 		locals.supabase
 			.from('attendance')
-			.select(`*`)
+			.select(`*, people("Email")`)
 			.order('Date', { ascending: true })
 			.gte('Date', fromDate)
 			.lte('Date', toDate)
@@ -38,6 +38,14 @@ export const load: PageServerLoad = async ({ params, url, locals }) => {
 			return newStats;
 		}
 		return stat;
+	});
+
+	stats = stats.map((stat) => {
+		return {
+			...stat,
+			email: stat.people?.Email || '',
+			people: null
+		};
 	});
 
 	const groupedService = groupBy(stats, (stat: { ServiceName: any }) => stat.ServiceName);
