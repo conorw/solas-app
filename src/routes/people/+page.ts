@@ -9,7 +9,7 @@ export const load: PageLoad = async (event) => {
         .select(`"Auto ID", "FirstName", "LastName", "DateOfBirth"`),
     ])
 
-    console.log(peopleData)
+    // console.log(peopleData)
 
     // if (error && status !== 406) throw error
 
