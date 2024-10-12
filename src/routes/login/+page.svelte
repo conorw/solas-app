@@ -24,8 +24,11 @@
 	};
 </script>
 
-<main>
-	<h1>Login</h1>
+<main style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh;">
+	<img src="/logo-1.png" width="80px" alt="Solas Logo" />
+	<h1>Solas Attendance Tracker</h1>
+	<h2>Login</h2>
+
 	<form on:submit|preventDefault={submitForm}>
 		<FormField name="email">
 			<Textfield bind:value={email} name="email" label="Email" />
