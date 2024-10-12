@@ -18,7 +18,7 @@
         "format": "prettier --plugin-search-dir . --write ."
     },
     "devDependencies": {
-        "@carbon/charts-svelte": "^1.7.6",
+        "@carbon/charts-svelte": "^1.22.0",
         "@playwright/test": "^1.28.1",
         "@smui-extra/autocomplete": "7.0.0",
         "@smui/card": "7.0.0",
