@@ -1,6 +1,5 @@
 <script lang="ts">
-	import '@carbon/styles/css/styles.css';
-	import '@carbon/charts/styles.css';
+	import '@carbon/charts-svelte/styles.css';
 	import DataTable, { Head, Body, Row, Cell, Label } from '@smui/data-table';
 	import Button from '@smui/button';
 
