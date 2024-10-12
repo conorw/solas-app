@@ -191,7 +191,7 @@
 				options={data?.service?.filter((s) => !s['Multi'])}
 				getOptionLabel={(service) => (service ? `${service.Name || ''}` : '')}
 				bind:value={selectedService}
-				label="Service"
+				label="Choose a Service"
 			/>
 		</div>
 		<div>
@@ -243,6 +243,7 @@
 									/>
 								{:else}
 									<PrimaryText
+										style="text-wrap: pretty"
 										>{attend['Person Name']}
 										<IconButton
 											class="material-icons"
