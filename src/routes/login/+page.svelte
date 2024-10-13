@@ -24,10 +24,9 @@
 	};
 </script>
 
-<main style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh;">
+<main style="text-align:center; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh;">
 	<img src="/logo-1.png" width="80px" alt="Solas Logo" />
 	<h1>Solas Attendance Tracker</h1>
-	<h2>Login</h2>
 
 	<form on:submit|preventDefault={submitForm}>
 		<FormField name="email">
@@ -36,6 +35,10 @@
 		<FormField name="password">
 			<Textfield bind:value={password} name="password" label="Password" />
 		</FormField>
-		<Button type="submit">Login</Button>
+		<div style="margin: 20px;">
+		<FormField>
+			<Button variant="raised" type="submit">Login</Button>
+		</FormField>
+	</div>
 	</form>
 </main>
