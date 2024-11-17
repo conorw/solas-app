@@ -193,6 +193,9 @@
 				bind:value={selectedService}
 				label="Choose a Service"
 			/>
+			<IconButton class="material-icons" on:click={() => (selectedService = undefined)}
+				>clear</IconButton
+			>
 		</div>
 		<div>
 			<Button on:click={addAttendee} variant="raised">
