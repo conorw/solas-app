@@ -14,6 +14,11 @@
 	import { goto } from '$app/navigation';
 	import Dialog, { InitialFocus } from '@smui/dialog';
 	import { Title } from '@smui/top-app-bar';
+	import { onMount } from 'svelte';
+	import { v4 as uuid } from 'uuid';
+
+	import { db } from '$lib/powersync/db';
+	import { SupabaseConnector } from '$lib/powersync/connector';
 
 	export let data: PageData;
 
@@ -25,7 +30,29 @@
 	let participantCount = 10;
 	let selectionIndex = -1;
 	let selected: any = null;
+	let service: any = [];
+	let people: any = [];
 	const attendanceFields = `"Auto ID", "Person Name" , "ServiceName", Multi, TotalAttendees`;
+
+	onMount(async () => {
+		try {
+			const powersyncConnector = new SupabaseConnector(data.supabase);
+			await powersyncConnector.init();
+			await db.init();
+			await db.connect(powersyncConnector);
+
+			service = await db.getAll('select * from service ORDER BY "Name"');
+			people = await db.getAll('select * from people ORDER BY "FirstName"');
+			attendance = await db.getAll(
+				`select ${attendanceFields} from attendance where "Date" = '${DateTime.fromJSDate(selectedDate).toFormat(
+					'yyyy-MM-dd'
+				)}' ORDER BY "Person Name"`
+			);
+			await updateAttendance(data.date);
+		} catch (error) {
+			console.error(error);
+		}
+	});
 
 	async function addMultiAttendee(service: any, count: number) {
 		const ret = await data.supabase
@@ -49,19 +76,22 @@
 		}
 	}
 	const updateAttendance = async (date: any) => {
-		const attendanceData = await data.supabase
-			.from('attendance')
-			.select(attendanceFields)
-			.eq(`Date`, `${date}`)
-			.order(`"Person Name"`, { ascending: true });
-		attendance = attendanceData.data?.map((a: any) => {
+
+		// const attendanceData = await data.supabase
+		// 	.from('attendance')
+		// 	.select(attendanceFields)
+		// 	.eq(`Date`, `${date}`)
+		// 	.order(`"Person Name"`, { ascending: true });
+		const attendanceData = await db.getAll(
+			`select ${attendanceFields} from attendance where "Date" = '${date}' ORDER BY "Person Name"`
+		);
+		attendance = attendanceData?.map((a: any) => {
 			return {
 				...a,
 				'Person Name': capitalizeFirstLetter(a['Person Name'])
 			};
 		});
 	};
-	updateAttendance(data.date);
 
 	const deleteAttendance = async (id: string) => {
 		const ret = await data.supabase.from('attendance').delete().eq('Auto ID', id);
@@ -112,19 +142,21 @@
 			alert('Please select a person, date and service');
 			return;
 		}
-		const ret = await data.supabase
-			.from('attendance')
-			.insert([
-				{
-					'Person Name': `${selectedPerson.FirstName} ${selectedPerson.LastName}`,
-					'Person Id': selectedPerson['Auto ID'],
-					ServiceName: selectedService.Name,
-					Date: DateTime.fromJSDate(selectedDate).toFormat('yyyy-MM-dd')
-				}
-			])
-			.select(attendanceFields);
-		if (ret.error) {
-			console.log(ret.error);
+		const ret = await db.execute(`insert into attendance ("Auto ID", "Person Name", "Person Id", "ServiceName", "Date") values ($1, $2, $3, $4)`, [uuid(), `${selectedPerson.FirstName} ${selectedPerson.LastName}`, selectedPerson['Auto ID'], selectedService.Name, DateTime.fromJSDate(selectedDate).toFormat('yyyy-MM-dd')]);
+		// const ret = await data.supabase
+		// 	.from('attendance')
+		// 	.insert([
+		// 		{
+		// 			'Person Name': `${selectedPerson.FirstName} ${selectedPerson.LastName}`,
+		// 			'Person Id': selectedPerson['Auto ID'],
+		// 			ServiceName: selectedService.Name,
+		// 			Date: DateTime.fromJSDate(selectedDate).toFormat('yyyy-MM-dd')
+		// 		}
+		// 	])
+		// 	.select(attendanceFields);
+		console.log(ret);
+		if (ret.rowsAffected === 0) {
+			console.log('Error adding attendee');
 		} else {
 			updateAttendance(DateTime.fromJSDate(selectedDate).toFormat('yyyy-MM-dd'));
 			selectedPerson = undefined;
@@ -153,7 +185,7 @@
 		}
 		const search = input.toLowerCase();
 		// Return a list of matches.
-		return data.people?.filter((item) => getPersonName(item).toLocaleLowerCase().includes(search));
+		return people?.filter((item) => getPersonName(item).toLocaleLowerCase().includes(search));
 	}
 </script>
 
@@ -176,7 +208,7 @@
 			style="width: 80%"
 			search={searchItems}
 			showMenuWithNoInput={false}
-			options={data?.people}
+			options={people}
 			getOptionLabel={(person) => getPersonName(person)}
 			bind:value={selectedPerson}
 			label="Start Typing Person Name"
@@ -188,7 +220,7 @@
 		<div>
 			<Autocomplete
 				style="width: 80%"
-				options={data?.service?.filter((s) => !s['Multi'])}
+				options={service?.filter((s) => !s['Multi'])}
 				getOptionLabel={(service) => (service ? `${service.Name || ''}` : '')}
 				bind:value={selectedService}
 				label="Choose a Service"
@@ -242,8 +274,7 @@
 										label="Number of participants"
 									/>
 								{:else}
-									<PrimaryText
-										style="text-wrap: pretty"
+									<PrimaryText style="text-wrap: pretty"
 										>{attend['Person Name']}
 										<IconButton
 											class="material-icons"
@@ -254,7 +285,7 @@
 										on:SMUISelect:change={() => updateService(attend)}
 										bind:value={attend['ServiceName']}
 									>
-										{#each data?.service as service}
+										{#each service as service}
 											<Option value={service.Name}>{service.Name}</Option>
 										{/each}
 									</Select>
@@ -278,7 +309,7 @@
 	<Content id="list-selection-content">
 		<Textfield type="number" bind:value={participantCount} label="Number of participants" />
 		<List singleSelection selectedIndex={selectionIndex}>
-			{#each data?.service?.filter((t) => t.Multi) as service, i}
+			{#each service?.filter((t) => t.Multi) as service, i}
 				<Item
 					on:SMUI:action={() => {
 						selectionIndex = i;
