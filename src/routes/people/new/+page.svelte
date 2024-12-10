@@ -1,3 +1,4 @@
+<!-- @migration-task Error while migrating Svelte code: Identifier 'person' has already been declared -->
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';

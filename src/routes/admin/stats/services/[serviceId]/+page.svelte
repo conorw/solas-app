@@ -5,7 +5,11 @@
 	import type { PageServerData } from './$types';
 	import { page } from '$app/stores';
 	import { exportData } from '$lib/types/utils';
-	export let data: PageServerData;
+	interface Props {
+		data: PageServerData;
+	}
+
+	let { data }: Props = $props();
 
 	let stats = data.stats;
 </script>

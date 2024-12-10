@@ -1,3 +1,4 @@
+<!-- @migration-task Error while migrating Svelte code: Identifier 'person' has already been declared -->
 <script lang="ts">
 	import type { person } from '$lib/types/rows';
 	import LayoutGrid, { Cell } from '@smui/layout-grid';

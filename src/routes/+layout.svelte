@@ -6,10 +6,15 @@
 	import type { LayoutData } from './$types';
 	import TopAppBar, { Row, Section } from '@smui/top-app-bar';
 
-	export let data: LayoutData;
 	import '../app.postcss';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { enhance } from '$app/forms';
+	interface Props {
+		data: LayoutData;
+		children?: import('svelte').Snippet;
+	}
+
+	let { data, children }: Props = $props();
 
 	onMount(() => {
 		const {
@@ -64,7 +69,7 @@
 		</ul>
 	</nav> -->
 
-<slot />
+{@render children?.()}
 
 <style>
 	ul#menu li {

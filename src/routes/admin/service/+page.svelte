@@ -1,3 +1,4 @@
+<!-- @migration-task Error while migrating Svelte code: Identifier 'service' has already been declared -->
 <script lang="ts">
 	import type { service } from '$lib/types/rows';
 	import DataTable, { Head, Body, Row, Cell, Label } from '@smui/data-table';

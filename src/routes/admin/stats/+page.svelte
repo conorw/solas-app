@@ -10,7 +10,11 @@
 	import type { PageServerData } from './$types';
 	import { goto } from '$app/navigation';
 	import { exportData } from '$lib/types/utils';
-	export let data: PageServerData;
+	interface Props {
+		data: PageServerData;
+	}
+
+	let { data = $bindable() }: Props = $props();
 
 	let stats = data.stats;
 </script>

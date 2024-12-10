@@ -15,16 +15,20 @@
 	import Dialog, { InitialFocus } from '@smui/dialog';
 	import { Title } from '@smui/top-app-bar';
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
 
-	let selectedPerson: any | undefined = undefined;
-	let selectedService: any | undefined = undefined;
-	let selectedDate: any = new Date(data.date) || new Date();
-	let attendance: any = [];
-	let open = false;
-	let participantCount = 10;
-	let selectionIndex = -1;
-	let selected: any = null;
+	let { data }: Props = $props();
+
+	let selectedPerson: any | undefined = $state(undefined);
+	let selectedService: any | undefined = $state(undefined);
+	let selectedDate: any = $state(new Date(data.date) || new Date());
+	let attendance: any = $state([]);
+	let open = $state(false);
+	let participantCount = $state(10);
+	let selectionIndex = $state(-1);
+	let selected: any = $state(null);
 	const attendanceFields = `"Auto ID", "Person Name" , "ServiceName", Multi, TotalAttendees`;
 
 	async function addMultiAttendee(service: any, count: number) {
@@ -181,7 +185,7 @@
 			bind:value={selectedPerson}
 			label="Start Typing Person Name"
 		/>
-		<IconButton class="material-icons" on:click={() => (selectedPerson = undefined)}
+		<IconButton class="material-icons" onclick={() => (selectedPerson = undefined)}
 			>clear</IconButton
 		>
 
@@ -193,12 +197,12 @@
 				bind:value={selectedService}
 				label="Choose a Service"
 			/>
-			<IconButton class="material-icons" on:click={() => (selectedService = undefined)}
+			<IconButton class="material-icons" onclick={() => (selectedService = undefined)}
 				>clear</IconButton
 			>
 		</div>
 		<div>
-			<Button on:click={addAttendee} variant="raised">
+			<Button onclick={addAttendee} variant="raised">
 				<Label>Add Attendee To List ></Label>
 			</Button>
 		</div>
@@ -208,7 +212,7 @@
 		</div>
 		<div style="margin-top:40%">
 			Add event with many anonymous users? <Button
-				on:click={() => {
+				onclick={() => {
 					open = true;
 				}}>Add multi event</Button
 			>
@@ -224,7 +228,7 @@
 			<LayoutGrid>
 				{#each attendance as attend}
 					<Cell>
-						<!-- <IconButton class="material-icons" on:click={() => {}}>delete</IconButton>
+						<!-- <IconButton class="material-icons" onclick={() => {}}>delete</IconButton>
 							<Text>
 								<PrimaryText>{attend['Person Name']}</PrimaryText>
 								<SecondaryText>{attend['ServiceName']}</SecondaryText>
@@ -235,12 +239,12 @@
 									<PrimaryText
 										>{attend['ServiceName']} (Multi)<IconButton
 											class="material-icons"
-											on:click={() => deleteAttendance(attend['Auto ID'])}>delete</IconButton
+											onclick={() => deleteAttendance(attend['Auto ID'])}>delete</IconButton
 										></PrimaryText
 									>
 									<Textfield
 										type="number"
-										on:change={() => updateAttendeeNumber(attend)}
+										onchange={() => updateAttendeeNumber(attend)}
 										bind:value={attend['TotalAttendees']}
 										label="Number of participants"
 									/>
@@ -250,7 +254,7 @@
 										>{attend['Person Name']}
 										<IconButton
 											class="material-icons"
-											on:click={() => deleteAttendance(attend['Auto ID'])}>delete</IconButton
+											onclick={() => deleteAttendance(attend['Auto ID'])}>delete</IconButton
 										></PrimaryText
 									>
 									<Select
@@ -296,16 +300,17 @@
 	</Content>
 	<Actions>
 		<Button
-			on:click={() => {
+			onclick={() => {
 				open = false;
 			}}
 		>
 			<Label>Cancel</Label>
 		</Button>
 		<Button
-			on:click={() => {
-				if (selected && participantCount > 0) {
-					addMultiAttendee(selected, participantCount);
+			onclick={() => {
+			console.log(selectedService, participantCount);
+				if (selectedService && participantCount > 0) {
+					addMultiAttendee(selectedService, participantCount);
 					open = false;
 				} else {
 					alert('Please select a service');

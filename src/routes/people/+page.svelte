@@ -7,8 +7,12 @@
 	import { DateTime } from 'luxon';
 	import type { PageData } from './$types';
 	import IconButton from '@smui/icon-button';
-	export let data: PageData;
-	let query = '';
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
+	let query = $state('');
 	const handleInput = (e: any) => {
 		query = e.target.value;
 		const queryVal = e.target.value.toLowerCase();
@@ -16,7 +20,7 @@
 			return `${p.FirstName} ${p.LastName}`.toLowerCase().includes(queryVal);
 		});
 	};
-	let people = data.people;
+	let people = $state(data.people);
 
 	async function deletePerson(person: person) {
 		// show a confirmation dialog
