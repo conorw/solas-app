@@ -93,7 +93,7 @@
 								>delete</IconButton
 							></Cell
 						>
-						{#if data.profile.isAdmin}
+						{#if data.profile?.isAdmin}
 							<Cell>
 								<a href={`/admin/stats/people/${item['Auto ID']}`}>History</a>
 							</Cell>

@@ -11,7 +11,7 @@ declare global {
 		interface Locals {
 			supabase: TypedSupabaseClient
 			getSession: () => Promise<Session | null>
-			getSafeSession: () => Promise<{ session: Session | null, user: any | null }>
+			safeGetSession: () => Promise<{ session: Session | null, user: any | null }>
 		}
 		interface PageData {
 			session: import("@supabase/supabase-js").Session | null
