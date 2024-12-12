@@ -222,7 +222,7 @@
 		</Cell>
 	{/if}
 	<Cell span={12}>
-		<Button style="width: 100%;" on:click={save} variant="unelevated" class="button-shaped-round">
+		<Button style="width: 100%;" onclick={save} variant="unelevated" class="button-shaped-round">
 			<Icon class="material-icons">save</Icon>
 			<Label>Save</Label>
 		</Button>

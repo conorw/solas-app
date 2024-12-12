@@ -38,7 +38,7 @@
 	<GridCell span={5}>
 		<Button
 			style="float:right;"
-			on:click={() => (open = true)}
+			onclick={() => (open = true)}
 			variant="unelevated"
 			class="button-shaped-round"
 		>
@@ -118,11 +118,11 @@
 		</FormField>
 	</Content>
 	<Actions>
-		<Button on:click={() => (clicked = 'No')}>
+		<Button onclick={() => (clicked = 'No')}>
 			<Label>Cancel</Label>
 		</Button>
 		<Button
-			on:click={() => {
+			onclick={() => {
 				data.supabase
 					.from('service')
 					.upsert([newItem])

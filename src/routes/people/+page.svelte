@@ -93,7 +93,7 @@
 
 						<Cell><a href={`/people/${item['Auto ID']}`}>Edit</a></Cell>
 						<Cell
-							><IconButton class="material-icons" on:click={() => deletePerson(item)}
+							><IconButton class="material-icons" onclick={() => deletePerson(item)}
 								>delete</IconButton
 							></Cell
 						>

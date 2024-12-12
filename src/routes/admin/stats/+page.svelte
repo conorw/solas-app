@@ -46,7 +46,7 @@
 />
 
 <Button
-	on:click={async () => {
+	onclick={async () => {
 		const peopleData = await $page.data.supabase.from('people').select('*');
 
 		exportData(peopleData.data, 'people.csv');
@@ -57,7 +57,7 @@
 	<Label>Export All User Data</Label>
 </Button>
 <Button
-	on:click={async () => {
+	onclick={async () => {
 		const peopleData = await data.stats;
 
 		exportData(peopleData, 'attendance.csv');
