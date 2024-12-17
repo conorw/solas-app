@@ -33,7 +33,7 @@
 
 <LayoutGrid>
 	<GridCell span={7}>
-		<Textfield bind:value={query} on:input={(event) => handleInput(event)} label="Search" />
+		<Textfield bind:value={query} oninput={(event) => handleInput(event)} label="Search" />
 	</GridCell>
 	<GridCell span={5}>
 		<Button
@@ -47,7 +47,7 @@
 		</Button>
 	</GridCell>
 	<GridCell span={12}>
-		<DataTable table$aria-label="User list">
+		<DataTable stickyHeader table$aria-label="Service list" style="width: 100%;height:70vh;overflow:auto">
 			<Head>
 				<Row>
 					<Cell columnId="Id">
@@ -67,7 +67,7 @@
 						<Cell>{item?.Name}</Cell>
 						<Cell>
 							<Checkbox
-								on:change={async () => {
+								onchange={async () => {
 									const ret = await data.supabase
 										.from('service')
 										.update({ 'Is Current': item['Is Current'] })
@@ -81,7 +81,7 @@
 						</Cell>
 						<Cell>
 							<Checkbox
-								on:change={async () => {
+								onchange={async () => {
 									const ret = await data.supabase
 										.from('service')
 										.update({ Multi: item['Multi'] })

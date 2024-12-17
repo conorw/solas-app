@@ -47,7 +47,7 @@
 
 <LayoutGrid>
 	<GridCell span={7}>
-		<Textfield value={query} on:input={(event) => handleInput(event)} label="Search" />
+		<Textfield value={query} oninput={(event) => handleInput(event)} label="Search" />
 	</GridCell>
 	<GridCell span={5}>
 		<Button href="/people/new" variant="unelevated" class="button-shaped-round">
@@ -57,7 +57,7 @@
 	</GridCell>
 
 	<GridCell span={12}>
-		<DataTable table$aria-label="User list" style="width: 100%;height:90%">
+		<DataTable stickyHeader table$aria-label="User list" style="width: 100%;height:70vh;overflow:auto">
 			<Head>
 				<Row>
 					<Cell columnId="firstname">
