@@ -1,6 +1,7 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { Datepicker } from 'svelte-calendar';
-	export let onChange: any;
 
 	// const theme = {
 	// 	calendar: {
@@ -14,11 +15,18 @@
 	// 	}
 	// };
 
-	let store: any;
+	let store: any = $state();
 
-	export let selected: Date;
+	interface Props {
+		onChange: any;
+		selected: Date;
+	}
 
-	$: $store?.selected ? onChange($store?.selected) : () => {};
+	let { onChange, selected = $bindable() }: Props = $props();
+
+	run(() => {
+		$store?.selected ? onChange($store?.selected) : () => {};
+	});
 </script>
 
 <Datepicker format={'DD/MM/YYYY'} {selected} bind:store />

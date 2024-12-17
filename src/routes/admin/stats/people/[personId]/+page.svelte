@@ -7,10 +7,14 @@
 	import type { PageServerData } from './$types';
 	import PersonForm from '../../../../../components/PersonForm.svelte';
 	import { page } from '$app/stores';
-	export let data: PageServerData;
+	interface Props {
+		data: PageServerData;
+	}
+
+	let { data }: Props = $props();
 
 	let stats = data.stats;
-	let active = 'Stats';
+	let active = $state('Stats');
 </script>
 
 {#if stats}
@@ -22,12 +26,14 @@
 		{/each} -->
 
 	<h2>{data.person['Full Name']}</h2>
-	<TabBar tabs={['Stats', 'details']} let:tab bind:active>
-		<!-- Note: the `tab` property is required! -->
-		<Tab {tab}>
-			<Label>{tab}</Label>
-		</Tab>
-	</TabBar>
+	<TabBar tabs={['Stats', 'details']}  bind:active>
+		{#snippet children({ tab })}
+				<!-- Note: the `tab` property is required! -->
+			<Tab {tab}>
+				<Label>{tab}</Label>
+			</Tab>
+					{/snippet}
+		</TabBar>
 
 	{#if active === 'Stats'}
 		<h2>Total Sessions: {data.stats.length}</h2>

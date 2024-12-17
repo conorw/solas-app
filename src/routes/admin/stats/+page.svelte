@@ -10,7 +10,11 @@
 	import type { PageServerData } from './$types';
 	import { goto } from '$app/navigation';
 	import { exportData } from '$lib/types/utils';
-	export let data: PageServerData;
+	interface Props {
+		data: PageServerData;
+	}
+
+	let { data = $bindable() }: Props = $props();
 
 	let stats = data.stats;
 </script>
@@ -42,7 +46,7 @@
 />
 
 <Button
-	on:click={async () => {
+	onclick={async () => {
 		const peopleData = await $page.data.supabase.from('people').select('*');
 
 		exportData(peopleData.data, 'people.csv');
@@ -53,7 +57,7 @@
 	<Label>Export All User Data</Label>
 </Button>
 <Button
-	on:click={async () => {
+	onclick={async () => {
 		const peopleData = await data.stats;
 
 		exportData(peopleData, 'attendance.csv');

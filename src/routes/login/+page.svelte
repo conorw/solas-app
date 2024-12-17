@@ -1,9 +1,11 @@
 <script lang="ts">
+	import { preventDefault } from 'svelte/legacy';
+
 	import Button, { Icon } from '@smui/button';
 	import FormField from '@smui/form-field';
 	import Textfield from '@smui/textfield';
-	let email = '';
-	let password = '';
+	let email = $state('');
+	let password = $state('');
 	const submitForm = (event: any) => {
 		let formData = new FormData();
 		formData.append('email', email.trim());
@@ -28,7 +30,7 @@
 	<img src="/logo-1.png" width="80px" alt="Solas Logo" />
 	<h1>Solas Attendance Tracker</h1>
 
-	<form on:submit|preventDefault={submitForm}>
+	<form onsubmit={preventDefault(submitForm)}>
 		<FormField name="email">
 			<Textfield bind:value={email} name="email" label="Email" />
 		</FormField>

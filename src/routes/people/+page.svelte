@@ -7,8 +7,12 @@
 	import { DateTime } from 'luxon';
 	import type { PageData } from './$types';
 	import IconButton from '@smui/icon-button';
-	export let data: PageData;
-	let query = '';
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
+	let query = $state('');
 	const handleInput = (e: any) => {
 		query = e.target.value;
 		const queryVal = e.target.value.toLowerCase();
@@ -16,7 +20,7 @@
 			return `${p.FirstName} ${p.LastName}`.toLowerCase().includes(queryVal);
 		});
 	};
-	let people = data.people;
+	let people = $state(data.people);
 
 	async function deletePerson(person: person) {
 		// show a confirmation dialog
@@ -43,7 +47,7 @@
 
 <LayoutGrid>
 	<GridCell span={7}>
-		<Textfield value={query} on:input={(event) => handleInput(event)} label="Search" />
+		<Textfield value={query} oninput={(event) => handleInput(event)} label="Search" />
 	</GridCell>
 	<GridCell span={5}>
 		<Button href="/people/new" variant="unelevated" class="button-shaped-round">
@@ -53,7 +57,7 @@
 	</GridCell>
 
 	<GridCell span={12}>
-		<DataTable table$aria-label="User list" style="width: 100%;height:90%">
+		<DataTable stickyHeader table$aria-label="User list" style="width: 100%;height:70vh;overflow:auto">
 			<Head>
 				<Row>
 					<Cell columnId="firstname">
@@ -89,7 +93,7 @@
 
 						<Cell><a href={`/people/${item['Auto ID']}`}>Edit</a></Cell>
 						<Cell
-							><IconButton class="material-icons" on:click={() => deletePerson(item)}
+							><IconButton class="material-icons" onclick={() => deletePerson(item)}
 								>delete</IconButton
 							></Cell
 						>

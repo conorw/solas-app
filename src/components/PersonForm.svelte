@@ -1,3 +1,4 @@
+<!-- @migration-task Error while migrating Svelte code: Identifier 'person' has already been declared -->
 <script lang="ts">
 	import type { person } from '$lib/types/rows';
 	import LayoutGrid, { Cell } from '@smui/layout-grid';
@@ -221,7 +222,7 @@
 		</Cell>
 	{/if}
 	<Cell span={12}>
-		<Button style="width: 100%;" on:click={save} variant="unelevated" class="button-shaped-round">
+		<Button style="width: 100%;" onclick={save} variant="unelevated" class="button-shaped-round">
 			<Icon class="material-icons">save</Icon>
 			<Label>Save</Label>
 		</Button>

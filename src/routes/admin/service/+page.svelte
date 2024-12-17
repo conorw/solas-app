@@ -1,3 +1,4 @@
+<!-- @migration-task Error while migrating Svelte code: Identifier 'service' has already been declared -->
 <script lang="ts">
 	import type { service } from '$lib/types/rows';
 	import DataTable, { Head, Body, Row, Cell, Label } from '@smui/data-table';
@@ -32,12 +33,12 @@
 
 <LayoutGrid>
 	<GridCell span={7}>
-		<Textfield bind:value={query} on:input={(event) => handleInput(event)} label="Search" />
+		<Textfield bind:value={query} oninput={(event) => handleInput(event)} label="Search" />
 	</GridCell>
 	<GridCell span={5}>
 		<Button
 			style="float:right;"
-			on:click={() => (open = true)}
+			onclick={() => (open = true)}
 			variant="unelevated"
 			class="button-shaped-round"
 		>
@@ -46,7 +47,7 @@
 		</Button>
 	</GridCell>
 	<GridCell span={12}>
-		<DataTable table$aria-label="User list">
+		<DataTable stickyHeader table$aria-label="Service list" style="width: 100%;height:70vh;overflow:auto">
 			<Head>
 				<Row>
 					<Cell columnId="Id">
@@ -66,7 +67,7 @@
 						<Cell>{item?.Name}</Cell>
 						<Cell>
 							<Checkbox
-								on:change={async () => {
+								onchange={async () => {
 									const ret = await data.supabase
 										.from('service')
 										.update({ 'Is Current': item['Is Current'] })
@@ -80,7 +81,7 @@
 						</Cell>
 						<Cell>
 							<Checkbox
-								on:change={async () => {
+								onchange={async () => {
 									const ret = await data.supabase
 										.from('service')
 										.update({ Multi: item['Multi'] })
@@ -117,11 +118,11 @@
 		</FormField>
 	</Content>
 	<Actions>
-		<Button on:click={() => (clicked = 'No')}>
+		<Button onclick={() => (clicked = 'No')}>
 			<Label>Cancel</Label>
 		</Button>
 		<Button
-			on:click={() => {
+			onclick={() => {
 				data.supabase
 					.from('service')
 					.upsert([newItem])
