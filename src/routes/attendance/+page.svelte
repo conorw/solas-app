@@ -225,7 +225,7 @@
 			)}
 		</h2>
 		{#if attendance?.length}
-			<LayoutGrid style="max-height:75vh;overflow:auto">
+			<LayoutGrid style="max-height:70vh;overflow:auto">
 				{#each attendance as attend}
 					<Cell>
 						<!-- <IconButton class="material-icons" onclick={() => {}}>delete</IconButton>
