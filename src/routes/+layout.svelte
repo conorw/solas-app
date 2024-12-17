@@ -15,6 +15,14 @@
 	}
 
 	let { data, children }: Props = $props();
+	import { page } from '$app/stores';
+
+	let title = $state('Solas Attendance Tracker');
+	$effect(() => {
+		title = ['Solas Attendance Tracker', ...$page.url.pathname.split('/').slice(1)]
+			.filter(Boolean)
+			.join(' - ');
+	});
 
 	onMount(() => {
 		const {
@@ -38,6 +46,9 @@
 	};
 </script>
 
+<svelte:head>
+	<title>{title}</title>
+</svelte:head>
 <TopAppBar variant="static">
 	<Row>
 		<Section>
