@@ -225,7 +225,7 @@
 			)}
 		</h2>
 		{#if attendance?.length}
-			<LayoutGrid style="max-height:70vh;overflow:auto">
+			<LayoutGrid style="min-height:600px;max-height:70vh;overflow:auto">
 				{#each attendance as attend}
 					<Cell>
 						<!-- <IconButton class="material-icons" onclick={() => {}}>delete</IconButton>
@@ -258,7 +258,7 @@
 										></PrimaryText
 									>
 									<Select
-										on:SMUISelect:change={() => updateService(attend)}
+										onchange={updateService(attend)}
 										bind:value={attend['ServiceName']}
 									>
 										{#each data?.service as service}
