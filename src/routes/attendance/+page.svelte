@@ -29,6 +29,7 @@
 	let participantCount = $state(10);
 	let selectionIndex = $state(-1);
 	let selected: any = $state(null);
+	let services = data?.service?.filter((s) => !s['Multi']);
 	const attendanceFields = `"Auto ID", "Person Name" , "ServiceName", Multi, TotalAttendees`;
 
 	async function addMultiAttendee(service: any, count: number) {
@@ -155,6 +156,12 @@
 		if (!input || input.length < 2) {
 			return [];
 		}
+		if (selectedPerson != null) {
+			// Return an array with just the already selected value to hide the menu.
+			// As soon as the user changes the text field, the value is unselected, so
+			// the search should run again.
+			return [selectedPerson];
+		}
 		const search = input.toLowerCase();
 		// Return a list of matches.
 		return data.people?.filter((item) => getPersonName(item).toLocaleLowerCase().includes(search));
@@ -180,7 +187,6 @@
 			style="width: 80%"
 			search={searchItems}
 			showMenuWithNoInput={false}
-			options={data?.people}
 			getOptionLabel={(person) => getPersonName(person)}
 			bind:value={selectedPerson}
 			label="Start Typing Person Name"
@@ -192,7 +198,18 @@
 		<div>
 			<Autocomplete
 				style="width: 80%"
-				options={data?.service?.filter((s) => !s['Multi'])}
+				options={services}
+				search={(input) => {
+					if (selectedService != null) {
+						// Return an array with just the already selected value to hide the menu.
+						// As soon as the user changes the text field, the value is unselected, so
+						// the search should run again.
+						return [selectedService];
+					}
+					const search = input.toLowerCase();
+					// Return a list of matches.
+					return services.filter((item) => item.Name.toLocaleLowerCase().includes(search));
+				}}
 				getOptionLabel={(service) => (service ? `${service.Name || ''}` : '')}
 				bind:value={selectedService}
 				label="Choose a Service"
