@@ -26,14 +26,14 @@
 		{/each} -->
 
 	<h2>{data.person['Full Name']}</h2>
-	<TabBar tabs={['Stats', 'details']}  bind:active>
-		{#snippet children({ tab })}
-				<!-- Note: the `tab` property is required! -->
+	<TabBar tabs={['Stats', 'details']} bind:active>
+		{#snippet tab(tab)}
+			<!-- Note: the `tab` property is required! -->
 			<Tab {tab}>
 				<Label>{tab}</Label>
 			</Tab>
-					{/snippet}
-		</TabBar>
+		{/snippet}
+	</TabBar>
 
 	{#if active === 'Stats'}
 		<h2>Total Sessions: {data.stats.length}</h2>
