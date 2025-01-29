@@ -27,7 +27,8 @@
 	let clicked = 'Nothing yet.';
 	let newItem = {
 		Name: '',
-		'Is Current': true
+		'Is Current': true,
+		Multi: false
 	};
 </script>
 
@@ -135,7 +136,8 @@
 							service = [...service];
 							newItem = {
 								Name: '',
-								'Is Current': true
+								'Is Current': true,
+								Multi: false
 							};
 							handleInput(null);
 						}
