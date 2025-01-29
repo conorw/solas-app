@@ -119,19 +119,19 @@
 	<Cell>
 		<FormField>
 			<Checkbox bind:checked={person['Marketing Opt Out']} />
-			<span slot="label">Marketing Opt Out</span>
+			{#snippet label()}Marketing Opt Out{/snippet}
 		</FormField>
 	</Cell>
 	<Cell>
 		<FormField>
 			<Checkbox bind:checked={person.Carer} />
-			<span slot="label">Carer?</span>
+			{#snippet label()}Carer?{/snippet}
 		</FormField>
 	</Cell>
 	<Cell>
 		<FormField>
 			<Checkbox bind:checked={person.Disability} />
-			<span slot="label">Disability?</span>
+			{#snippet label()}Disability?{/snippet}
 		</FormField>
 	</Cell>
 </LayoutGrid>
@@ -140,7 +140,7 @@
 	<Cell>
 		<FormField>
 			<Checkbox bind:checked={person['Equality Opt Out']} />
-			<span slot="label">Equality Opt Out</span>
+			{#snippet label()}Equality Opt Out{/snippet}
 		</FormField>
 	</Cell>
 
@@ -192,32 +192,32 @@
 	<Cell>
 		<FormField>
 			<Checkbox bind:checked={person['Acupuncture Data']} />
-			<span slot="label">Acupuncture data?</span>
+			{#snippet label()}Acupuncture data?{/snippet}
 		</FormField>
 	</Cell>
 	{#if person['Acupuncture Data']}
 		<Cell>
 			<FormField>
 				<Checkbox bind:checked={person.Haemophilia} />
-				<span slot="label">Haemophilia?</span>
+				{#snippet label()}Haemophilia?{/snippet}
 			</FormField>
 		</Cell>
 		<Cell>
 			<FormField>
 				<Checkbox bind:checked={person.Pregnant} />
-				<span slot="label">Pregnant?</span>
+				{#snippet label()}Pregnant?{/snippet}
 			</FormField>
 		</Cell>
 		<Cell>
 			<FormField>
 				<Checkbox bind:checked={person['Give Blood']} />
-				<span slot="label">Gives blood regulary?</span>
+				{#snippet label()}Gives blood regulary?{/snippet}
 			</FormField>
 		</Cell>
 		<Cell>
 			<FormField>
 				<Checkbox bind:checked={person.Signed} />
-				<span slot="label">Signed?</span>
+				{#snippet label()}Signed?{/snippet}
 			</FormField>
 		</Cell>
 	{/if}

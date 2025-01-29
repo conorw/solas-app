@@ -110,11 +110,11 @@
 		<Textfield bind:value={newItem.Name} label="Name" />
 		<FormField>
 			<Checkbox bind:checked={newItem['Is Current']} />
-			<span slot="label">is Current?</span>
+			{#snippet label()}is Current?{/snippet}
 		</FormField>
 		<FormField>
 			<Checkbox bind:checked={newItem['Multi']} />
-			<span slot="label">Is Bulk Event?</span>
+			{#snippet label()}Is Bulk Event?{/snippet}
 		</FormField>
 	</Content>
 	<Actions>
