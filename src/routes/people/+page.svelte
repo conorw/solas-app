@@ -3,6 +3,7 @@
 	import DataTable, { Head, Body, Row, Cell, Label } from '@smui/data-table';
 	import LayoutGrid, { Cell as GridCell } from '@smui/layout-grid';
 	import Button, { Icon } from '@smui/button';
+	import Snackbar from '@smui/snackbar';
 	import Textfield from '@smui/textfield';
 	import { DateTime } from 'luxon';
 	import type { PageData } from './$types';
@@ -20,24 +21,40 @@
 			return `${p.FirstName} ${p.LastName}`.toLowerCase().includes(queryVal);
 		});
 	};
+	let snackbarWithoutClose: Snackbar;
+	let snackMessage = $state('');
 	let people = $state(data.people);
 
 	async function deletePerson(person: person) {
 		// show a confirmation dialog
 		if (
 			confirm(
-				`Are you sure you want to entirely delete ${person.FirstName} ${person.LastName} (userid: ${person['Auto ID']}) from the system?`
+				`Are you sure you want to entirely delete ${person.FirstName} ${person.LastName} (userid: ${person['Auto ID']}) from the system? Warning: This will also delete all attendance records for this person!`
 			)
 		) {
+			// delete the attendance records and then the person
+			const deleteAttendance = await data.supabase
+				.from('attendance')
+				.delete()
+				.match({ 'Person Id': person['Auto ID'] });
+
+			if (deleteAttendance.status !== 204) {
+				snackMessage = `Error deleting attendance records for this person: ${deleteAttendance.error?.message}`;
+				snackbarWithoutClose.open();
+				return;
+			}
 			// delete the person
 			const ret = await data.supabase
 				.from('people')
 				.delete()
 				.match({ 'Auto ID': person['Auto ID'] });
 			if (ret.status !== 204) {
-				alert('Error deleting attendance records for this person');
+				snackMessage = `Error deleting this person: ${ret.error?.message}`;
+				snackbarWithoutClose.open();
 				return;
 			} else {
+				snackMessage = `Person ${person.FirstName} ${person.LastName} deleted successfully`;
+				snackbarWithoutClose.open();
 				// remove the person from the list
 				people = people.filter((p) => p['Auto ID'] !== person['Auto ID']);
 			}
@@ -57,7 +74,11 @@
 	</GridCell>
 
 	<GridCell span={12}>
-		<DataTable stickyHeader table$aria-label="User list" style="width: 100%;height:70vh;overflow:auto">
+		<DataTable
+			stickyHeader
+			table$aria-label="User list"
+			style="width: 100%;height:70vh;overflow:auto"
+		>
 			<Head>
 				<Row>
 					<Cell columnId="firstname">
@@ -111,4 +132,7 @@
 			</Body>
 		</DataTable>
 	</GridCell>
+	<Snackbar bind:this={snackbarWithoutClose}>
+		<Label>{snackMessage}</Label>
+	  </Snackbar>
 </LayoutGrid>
