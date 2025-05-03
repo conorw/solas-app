@@ -216,6 +216,18 @@
 		</Cell>
 		<Cell>
 			<FormField>
+				<Checkbox bind:checked={person['Epilepsy']} />
+				{#snippet label()}Epilepsy?{/snippet}
+			</FormField>
+		</Cell>
+		<Cell>
+			<FormField>
+				<Checkbox bind:checked={person['Pacemaker']} />
+				{#snippet label()}Pacemaker?{/snippet}
+			</FormField>
+		</Cell>
+		<Cell>
+			<FormField>
 				<Checkbox bind:checked={person.Signed} />
 				{#snippet label()}Signed?{/snippet}
 			</FormField>

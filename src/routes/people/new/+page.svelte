@@ -34,6 +34,8 @@
 		Pregnant: false,
 		'Give Blood': false,
 		Signed: false,
+		Eplepsy: false,
+		Pacemaker: false,
 		'Full Name': ''
 	};
 </script>
