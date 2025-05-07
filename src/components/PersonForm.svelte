@@ -17,7 +17,6 @@
 	export let person: person;
 	export let onSave: any;
 	export let supabase: any;
-	// mock async request
 
 	const save = async () => {
 		supabase

@@ -1,6 +1,5 @@
 <!-- @migration-task Error while migrating Svelte code: Identifier 'person' has already been declared -->
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import type { person } from '$lib/types/rows';
 	import PersonForm from '../../../components/PersonForm.svelte';
@@ -34,7 +33,7 @@
 		Pregnant: false,
 		'Give Blood': false,
 		Signed: false,
-		Eplepsy: false,
+		Epilepsy: false,
 		Pacemaker: false,
 		'Full Name': ''
 	};
