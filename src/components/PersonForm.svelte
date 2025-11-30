@@ -133,6 +133,12 @@
 			{#snippet label()}Disability?{/snippet}
 		</FormField>
 	</Cell>
+	<Cell>
+		<FormField>
+			<Checkbox bind:checked={person.ClientAgreementSigned} />
+			{#snippet label()}Client Agreement Signed?{/snippet}
+		</FormField>
+	</Cell>
 </LayoutGrid>
 <h2>Equality Data</h2>
 <LayoutGrid>

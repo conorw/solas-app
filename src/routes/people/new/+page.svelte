@@ -28,6 +28,7 @@
 		'Marital Status': '',
 		Carer: false,
 		Disability: false,
+		ClientAgreementSigned: false,
 		'Joined Date': '',
 		Haemophilia: false,
 		Pregnant: false,

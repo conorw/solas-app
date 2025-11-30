@@ -64,6 +64,7 @@ export interface Database {
           "Marital Status": string | null
           Carer: string | null
           Disability: string | null
+          ClientAgreementSigned: string | null
           "Joined Date": string | null
           "Acupuncture Data": Json | null
           Haemophilia: string | null
@@ -97,6 +98,7 @@ export interface Database {
           "Marital Status"?: string | null
           Carer?: string | null
           Disability?: string | null
+          ClientAgreementSigned?: string | null
           "Joined Date"?: string | null
           "Acupuncture Data"?: Json | null
           Haemophilia?: string | null
@@ -130,6 +132,7 @@ export interface Database {
           "Marital Status"?: string | null
           Carer?: string | null
           Disability?: string | null
+          ClientAgreementSigned?: string | null
           "Joined Date"?: string | null
           "Acupuncture Data"?: Json | null
           Haemophilia?: string | null
