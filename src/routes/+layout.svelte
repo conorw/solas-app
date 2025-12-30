@@ -64,6 +64,9 @@
 					<IconButton href="/admin/stats" class="material-icons" aria-label="stats"
 						>query_stats</IconButton
 					>
+					<IconButton href="/admin/people/merge" class="material-icons" aria-label="Merge Persons"
+						>merge_type</IconButton
+					>
 				{/if}
 				<!-- <IconButton class="material-icons" aria-label="logout">logout</IconButton> -->
 				<form action="/logout" method="POST" use:enhance={submitLogout}>
