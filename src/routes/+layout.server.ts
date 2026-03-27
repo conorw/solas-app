@@ -6,7 +6,9 @@ export const load: LayoutServerLoad = async ({ locals: { safeGetSession, supabas
   
 	if (!session?.user && (!url.pathname.includes('login') && !url.pathname.includes('reset-password'))) throw redirect(303, "/login")
 	if (url.pathname === '/') throw redirect(302, "/attendance")
-	const profile = await (await supabase.from('profiles').select('*').eq('id', session?.user?.id).single()).data;
+	const profile = session?.user?.id
+		? (await supabase.from('profiles').select('*').eq('id', session.user.id).single()).data
+		: null
 
 	if (url.pathname.includes('admin') && (!profile || !profile?.isAdmin)) throw redirect(303, "/attendance")
 
