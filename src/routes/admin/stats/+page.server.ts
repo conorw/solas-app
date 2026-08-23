@@ -1,4 +1,4 @@
-import type { attendance } from '#lib/types/rows.js';
+import type { attendanceWithPeople } from '#lib/types/rows.js';
 import { DateTime } from 'luxon';
 import type { PageServerLoad } from './$types';
 import {
@@ -22,7 +22,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 			.lte('Date', toDate)
 	]);
 
-	let stats = expandMultiAttendance((serviceData?.data || []) as attendance[]);
+	let stats = expandMultiAttendance((serviceData?.data || []) as attendanceWithPeople[]);
 
 	stats = stats.map((stat) => {
 		return {
@@ -33,8 +33,8 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 	});
 
 	const groupedService = groupBy(stats, (stat: { ServiceName: any }) => stat.ServiceName);
-	const groupedByMonth = groupBy(stats, (stat: attendance) => monthKey(stat.Date));
-	const groupedUser = groupBy(stats, (stat: attendance) => stat['Person Id']);
+	const groupedByMonth = groupBy(stats, (stat: attendanceWithPeople) => monthKey(stat.Date));
+	const groupedUser = groupBy(stats, (stat: attendanceWithPeople) => stat['Person Id']);
 
 	return {
 		stats,

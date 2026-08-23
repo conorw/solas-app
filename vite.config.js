@@ -6,7 +6,7 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
 	plugins: [
 		sveltekit({
-			preprocess: [vitePreprocess({ script: true })],
+			preprocess: [vitePreprocess()],
 			adapter: adapter()
 		})
 	],

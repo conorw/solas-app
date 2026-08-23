@@ -8,8 +8,8 @@
 	import IconButton from '@smui/icon-button';
 	import { Icon as CommonIcon } from '@smui/common';
 	import Dialog, { Title, Content, Actions } from '@smui/dialog';
-	import { DateTime } from 'luxon';
 	import { enhance } from '$app/forms';
+	import { getPersonName } from '#lib/person.js';
 
 	interface Props {
 		data: PageData;
@@ -25,21 +25,6 @@
 	let mergeResult: any = $state(null);
 	let confirmDialogOpen = $state(false);
 	let mergeForm: HTMLFormElement;
-
-	function capitalizeFirstLetter(str: string) {
-		return str?.replace(/\w\S*/g, function (txt) {
-			return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-		});
-	}
-
-	function getPersonName(person: any) {
-		if (!person) return '';
-		return person
-			? `${capitalizeFirstLetter(person.FirstName)} ${
-					capitalizeFirstLetter(person.LastName) || ''
-			  } (b.${person.DateOfBirth ? DateTime.fromISO(person.DateOfBirth).toFormat('yyyy') : 'N/A'})`
-			: '';
-	}
 
 	async function searchItems(
 		input: string,

@@ -15,6 +15,8 @@
 	import { goto } from '$app/navigation';
 	import Dialog, { InitialFocus } from '@smui/dialog';
 	import { Title } from '@smui/top-app-bar';
+	import { ANONYMOUS_PERSON_ID } from '#lib/constants.js';
+	import { capitalizeFirstLetter, getPersonName } from '#lib/person.js';
 
 	interface Props {
 		data: PageData;
@@ -39,7 +41,7 @@
 			.insert([
 				{
 					'Person Name': `Anonymous Attendee`,
-					'Person Id': 2830,
+					'Person Id': ANONYMOUS_PERSON_ID,
 					ServiceName: service.Name,
 					Multi: true,
 					TotalAttendees: count,
@@ -137,22 +139,6 @@
 		}
 	};
 
-	function capitalizeFirstLetter(str: string) {
-		// capitatize first letter of each word in string and return
-		return str?.replace(/\w\S*/g, function (txt) {
-			return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-		});
-	}
-	function getPersonName(person: any) {
-		if (!person) return '';
-		return person
-			? `${capitalizeFirstLetter(person.FirstName)} ${
-					capitalizeFirstLetter(person.LastName) || ''
-			  } (b.${DateTime.fromISO(person.DateOfBirth).toFormat('yyyy')}) (Acupuncture:${
-					person['Acupuncture Data'] || false
-			  })`
-			: '';
-	}
 	async function searchItems(input: string) {
 		if (!input || input.length < 2) {
 			return [];

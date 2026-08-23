@@ -3,14 +3,14 @@ import type { PageServerLoad } from './$types';
 import { groupBy, monthKey, popularServiceLabel } from '#lib/stats.js';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
-	const personId: string = params.personId;
+	const personId = Number(params.personId);
 	const [serviceData, peopleData] = await Promise.all([
 		locals.supabase
 			.from('attendance')
 			.select(`*`)
 			.order('Date', { ascending: false })
 			.eq('Person Id', personId),
-		locals.supabase.from('people').select(`*`).eq(`Auto ID`, params.personId).single()
+		locals.supabase.from('people').select(`*`).eq(`Auto ID`, personId).single()
 	]);
 
 	const stats = (serviceData?.data || []) as attendance[];

@@ -1,6 +1,5 @@
-<!-- @migration-task Error while migrating Svelte code: Identifier 'service' has already been declared -->
 <script lang="ts">
-	import type { service } from '#lib/types/rows.js';
+	import type { service as ServiceRow } from '#lib/types/rows.js';
 	import DataTable, { Head, Body, Row, Cell, Label } from '@smui/data-table';
 	import FormField from '@smui/form-field';
 	import LayoutGrid, { Cell as GridCell } from '@smui/layout-grid';
@@ -9,23 +8,24 @@
 	import type { PageData } from './$types';
 	import Checkbox from '@smui/checkbox';
 	import { tick } from 'svelte';
+	import Dialog, { Title, Content, Actions } from '@smui/dialog';
+
 	export let data: PageData;
 	let query = '';
-	const handleInput = (e: any) => {
+	let service = data.service;
+
+	const handleInput = (_e: Event | null) => {
 		const queryVal = query.toLowerCase();
 		service = data.service
-			.filter((p: service) => {
+			.filter((p: ServiceRow) => {
 				return `${p.Name}`.toLowerCase().includes(queryVal);
 			})
 			.sort((a, b) => {
-				return a.Name?.localeCompare(b.Name || '');
+				return a.Name?.localeCompare(b.Name || '') ?? 0;
 			});
 	};
-	let service = data.service;
-	import Dialog, { Title, Content, Actions } from '@smui/dialog';
 
 	let open = false;
-	let clicked = 'Nothing yet.';
 	let newItem = {
 		Name: '',
 		'Is Current': true,
@@ -103,10 +103,6 @@
 								bind:checked={item['Multi']}
 							/>
 						</Cell>
-						<!-- 
-        <Cell>{item.username}</Cell>
-        <Cell>{item.email}</Cell>
-        <Cell>{item.website}</Cell> -->
 					</Row>
 				{/each}
 			</Body>
@@ -114,7 +110,6 @@
 	</GridCell>
 </LayoutGrid>
 <Dialog bind:open aria-labelledby="simple-title" aria-describedby="simple-content">
-	<!-- Title cannot contain leading whitespace due to mdc-typography-baseline-top() -->
 	<Title id="simple-title">Add New Service</Title>
 	<Content id="simple-content">
 		<Textfield bind:value={newItem.Name} label="Name" />
@@ -128,7 +123,7 @@
 		</FormField>
 	</Content>
 	<Actions>
-		<Button onclick={() => (clicked = 'No')}>
+		<Button onclick={() => (open = false)}>
 			<Label>Cancel</Label>
 		</Button>
 		<Button
@@ -149,6 +144,7 @@
 								Multi: false
 							};
 							handleInput(null);
+							open = false;
 						}
 					});
 			}}

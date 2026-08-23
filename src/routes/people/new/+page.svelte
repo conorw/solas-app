@@ -3,7 +3,9 @@
 	import type { person as PersonRow } from '#lib/types/rows.js';
 	import PersonForm from '../../../components/PersonForm.svelte';
 
-	let person: PersonRow = {
+	let person = {
+		'Auto ID': 0,
+		Id: null,
 		FirstName: '',
 		LastName: '',
 		DateOfBirth: '1980-01-01',
@@ -36,7 +38,7 @@
 		Epilepsy: false,
 		Pacemaker: false,
 		'Full Name': ''
-	};
+	} satisfies PersonRow;
 </script>
 
 <PersonForm supabase={page.data.supabase} {person} onSave={() => history.back()} />

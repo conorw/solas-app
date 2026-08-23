@@ -1,4 +1,4 @@
-import type { attendance } from '#lib/types/rows.js';
+import type { attendanceWithPeople } from '#lib/types/rows.js';
 import { DateTime } from 'luxon';
 import type { PageServerLoad } from './$types';
 import { expandMultiAttendance, groupBy } from '#lib/stats.js';
@@ -19,8 +19,8 @@ export const load: PageServerLoad = async ({ params, url, locals }) => {
 			.eq('ServiceName', serviceName)
 	]);
 
-	const stats = expandMultiAttendance((serviceData?.data || []) as attendance[]);
-	const groupedUser = groupBy(stats, (stat: any) => stat['Person Name']);
+	const stats = expandMultiAttendance((serviceData?.data || []) as attendanceWithPeople[]);
+	const groupedUser = groupBy(stats, (stat: attendanceWithPeople) => stat['Person Name']);
 	return {
 		stats,
 		groupedUser,

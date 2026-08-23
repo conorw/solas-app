@@ -25,7 +25,8 @@ export const handle: Handle = async ({ event, resolve }) => {
   /**
    * Unlike `supabase.auth.getSession()`, which returns the session _without_
    * validating the JWT, this function also calls `getUser()` to validate the
-   * JWT before returning the session.
+   * JWT before returning the session. The returned session uses the validated
+   * user so accessing `session.user` does not trigger the insecure-proxy warning.
    */
   event.locals.safeGetSession = async () => {
     const {
@@ -39,12 +40,12 @@ export const handle: Handle = async ({ event, resolve }) => {
       data: { user },
       error,
     } = await event.locals.supabase.auth.getUser()
-    if (error) {
+    if (error || !user) {
       // JWT validation has failed
       return { session: null, user: null }
     }
 
-    return { session, user }
+    return { session: { ...session, user }, user }
   }
 
   return resolve(event, {

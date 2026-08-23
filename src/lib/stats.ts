@@ -30,7 +30,7 @@ type MultiAttendance = {
 export function expandMultiAttendance<T extends MultiAttendance>(stats: T[]): T[] {
 	return stats.flatMap((stat) => {
 		if (stat.Multi && (stat.TotalAttendees ?? 0) > 1) {
-			return Array(stat.TotalAttendees).fill(stat) as T[];
+			return Array(stat.TotalAttendees ?? 0).fill(stat) as T[];
 		}
 		return [stat];
 	});

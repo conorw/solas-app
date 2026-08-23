@@ -28,8 +28,8 @@
 	onMount(() => {
 		const {
 			data: { subscription }
-		} = data.supabase.auth.onAuthStateChange((_event, _session) => {
-			if (data.session?.expires_at !== _session?.expires_at) {
+		} = data.supabase.auth.onAuthStateChange((event) => {
+			if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
 				refreshAll();
 			}
 		});
@@ -81,9 +81,3 @@
 </TopAppBar>
 
 {@render children?.()}
-
-<style>
-	ul#menu li {
-		display: inline;
-	}
-</style>

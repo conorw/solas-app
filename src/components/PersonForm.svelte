@@ -18,11 +18,21 @@
 	export let onSave: any;
 	export let supabase: any;
 
+	let equalityOptOut = Boolean(person['Equality Opt Out']);
+
 	const save = async () => {
+		person['Equality Opt Out'] = equalityOptOut;
+		const payload =
+			person['Auto ID'] && person['Auto ID'] > 0
+				? person
+				: (() => {
+						const { 'Auto ID': _id, ...rest } = person;
+						return rest;
+					})();
 		supabase
 			.from('people')
-			.upsert(person)
-			.then((ret) => {
+			.upsert(payload)
+			.then((ret: { error: { message: string } | null }) => {
 				if (ret.error) {
 					text = ret.error.message;
 					snackbar?.open();
@@ -144,12 +154,12 @@
 <LayoutGrid>
 	<Cell>
 		<FormField>
-			<Checkbox bind:checked={person['Equality Opt Out']} />
+			<Checkbox bind:checked={equalityOptOut} />
 			{#snippet label()}Equality Opt Out{/snippet}
 		</FormField>
 	</Cell>
 
-	{#if !person['Equality Opt Out']}
+	{#if !equalityOptOut}
 		<Cell>
 			<Select label="Religion" bind:value={person.Religion}>
 				<Option value="" />

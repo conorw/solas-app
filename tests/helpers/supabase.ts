@@ -1,3 +1,4 @@
+import { ANONYMOUS_PERSON_ID } from '../../src/lib/constants';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { requireEnv } from './env';
 
@@ -15,5 +16,5 @@ export function getServiceClient(): SupabaseClient {
 }
 
 export function anonymousPersonId(): number {
-	return Number(process.env.TEST_ANONYMOUS_PERSON_ID || 2830);
+	return Number(process.env.TEST_ANONYMOUS_PERSON_ID || ANONYMOUS_PERSON_ID);
 }

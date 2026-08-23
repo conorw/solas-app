@@ -25,8 +25,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 export const actions: Actions = {
 	merge: async ({ request, locals }) => {
 		// Verify admin access by fetching profile
-		const { session } = await locals.safeGetSession();
-		if (!session?.user) {
+		const { session, user } = await locals.safeGetSession();
+		if (!session || !user) {
 			return fail(403, {
 				error: 'Authentication required',
 				success: false
@@ -36,7 +36,7 @@ export const actions: Actions = {
 		const { data: profile } = await locals.supabase
 			.from('profiles')
 			.select('*')
-			.eq('id', session.user.id)
+			.eq('id', user.id)
 			.single();
 
 		if (!profile || !profile.isAdmin) {
