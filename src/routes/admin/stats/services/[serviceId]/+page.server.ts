@@ -1,20 +1,8 @@
-import type { attendance, person } from '$lib/types/rows';
+import type { attendance } from '$lib/types/rows';
 import { DateTime } from 'luxon';
 import type { PageServerLoad } from './$types';
+import { expandMultiAttendance, groupBy } from '$lib/stats';
 
-function groupBy(list, keyGetter, sort = true) {
-	const map = new Map();
-	list.forEach((item) => {
-		const key = keyGetter(item);
-		const collection = map.get(key);
-		if (!collection) {
-			map.set(key, [item]);
-		} else {
-			collection.push(item);
-		}
-	});
-	return sort ? [...map.entries()].sort((a, b) => b[1].length - a[1].length) : [...map.entries()];
-}
 export const load: PageServerLoad = async ({ params, url, locals }) => {
 	const serviceName: string = params.serviceId;
 	const fromDate =
@@ -31,16 +19,7 @@ export const load: PageServerLoad = async ({ params, url, locals }) => {
 			.eq('ServiceName', serviceName)
 	]);
 
-	// console.log(serviceData);
-	let stats = (serviceData?.data || []) as attendance[];
-	// pad out the data with duplicated rows for multi service attendance
-	stats = stats.flatMap((stat) => {
-		if (stat.Multi && stat.TotalAttendees > 1) {
-			const newStats = Array(stat.TotalAttendees).fill(stat);
-			return newStats;
-		}
-		return stat;
-	});
+	const stats = expandMultiAttendance((serviceData?.data || []) as attendance[]);
 	const groupedUser = groupBy(stats, (stat: any) => stat['Person Name']);
 	return {
 		stats,

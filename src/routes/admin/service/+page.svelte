@@ -8,6 +8,7 @@
 	import Textfield from '@smui/textfield';
 	import type { PageData } from './$types';
 	import Checkbox from '@smui/checkbox';
+	import { tick } from 'svelte';
 	export let data: PageData;
 	let query = '';
 	const handleInput = (e: any) => {
@@ -68,10 +69,14 @@
 						<Cell>{item?.Name}</Cell>
 						<Cell>
 							<Checkbox
-								onchange={async () => {
+								onchange={async (e) => {
+									const fromEvent = (e?.target as HTMLInputElement | null)?.checked;
+									await tick();
+									const checked = fromEvent ?? item['Is Current'];
+									item['Is Current'] = checked;
 									const ret = await data.supabase
 										.from('service')
-										.update({ 'Is Current': item['Is Current'] })
+										.update({ 'Is Current': checked })
 										.eq('Auto ID', item['Auto ID']);
 									if (ret.error) {
 										console.log(ret.error);
@@ -82,10 +87,14 @@
 						</Cell>
 						<Cell>
 							<Checkbox
-								onchange={async () => {
+								onchange={async (e) => {
+									const fromEvent = (e?.target as HTMLInputElement | null)?.checked;
+									await tick();
+									const checked = fromEvent ?? item['Multi'];
+									item['Multi'] = checked;
 									const ret = await data.supabase
 										.from('service')
-										.update({ Multi: item['Multi'] })
+										.update({ Multi: checked })
 										.eq('Auto ID', item['Auto ID']);
 									if (ret.error) {
 										console.log(ret.error);
