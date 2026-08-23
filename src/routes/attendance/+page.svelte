@@ -335,8 +335,4 @@
 			width: 100%;
 		}
 	}
-	.demo-list {
-		width: 100%;
-		overflow: auto;
-	}
 </style>
