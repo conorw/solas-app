@@ -13,4 +13,5 @@
 	supabase={page.data.supabase}
 	onSave={() => history.back()}
 	person={data?.person}
+	title="Edit person"
 />

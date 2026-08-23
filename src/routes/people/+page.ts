@@ -1,20 +1,21 @@
-
 import type { person } from '#lib/types/rows.js';
 import type { PageLoad } from './$types';
+
 export const load: PageLoad = async (event) => {
+	const parent = await event.parent();
+	const peopleData = await parent.supabase
+		.from('people')
+		.select(`"Auto ID", "FirstName", "LastName", "DateOfBirth"`);
 
-    const parent = await event.parent();
-    const [peopleData] = await Promise.all([parent.supabase
-        .from('people')
-        .select(`"Auto ID", "FirstName", "LastName", "DateOfBirth"`),
-    ])
+	const people = ((peopleData?.data || []) as unknown as person[]).sort((a, b) => {
+		const first = (a.FirstName ?? '').localeCompare(b.FirstName ?? '', undefined, {
+			sensitivity: 'base'
+		});
+		if (first !== 0) return first;
+		return (a.LastName ?? '').localeCompare(b.LastName ?? '', undefined, {
+			sensitivity: 'base'
+		});
+	});
 
-    // console.log(peopleData)
-
-    // if (error && status !== 406) throw error
-
-    return {
-        people: (peopleData?.data?.sort((a, b) => b.FirstName?.toLowerCase() > a.FirstName?.toLowerCase() ? 1 : b.FirstName?.toLowerCase() < a.FirstName?.toLowerCase() ? -1 : 0
-        ) || []).reverse() as unknown as person[]
-    };
-}
+	return { people };
+};
