@@ -7,6 +7,18 @@ export type profile = Database['public']['Tables']['profiles']['Row'];
 
 /** Attendance row with optional joined people fields from Supabase selects. */
 export type attendanceWithPeople = attendance & {
-	people?: Pick<person, 'Email' | 'Phone' | 'Marketing Opt Out'> | null;
+	people?: Pick<
+		person,
+		| 'Email'
+		| 'Phone'
+		| 'Marketing Opt Out'
+		| 'Gender'
+		| 'Town'
+		| 'DateOfBirth'
+		| 'Carer'
+		| 'Disability'
+		| 'Referral Source'
+		| 'Other Support'
+	> | null;
 	email?: string;
 };

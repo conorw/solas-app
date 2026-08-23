@@ -33,7 +33,9 @@ test.describe('admin services', () => {
 		await page.getByRole('button', { name: /add new service/i }).click();
 		await page.getByLabel('Name').fill(name);
 		await page.getByRole('button', { name: /^save$/i }).click();
-		await expect(page.getByText(name)).toBeVisible({ timeout: 15000 });
+		await expect(page.locator('.service-name', { hasText: name })).toBeVisible({
+			timeout: 15000
+		});
 
 		const sb = getServiceClient();
 		const { data } = await sb.from('service').select('"Auto ID"').eq('Name', name).maybeSingle();

@@ -38,16 +38,48 @@ test.describe('admin stats', () => {
 
 	test('stats page renders totals for seeded attendance', async ({ page }) => {
 		await page.goto('/admin/stats');
-		await expect(page.getByText(/Total Unique People/i)).toBeVisible({ timeout: 20000 });
-		await expect(page.getByText(/Total Sessions/i)).toBeVisible();
+		await expect(page.getByText(/Unique people/i)).toBeVisible({ timeout: 20000 });
+		await expect(page.getByText(/Total sessions/i)).toBeVisible();
 		await expect(page.getByRole('link', { name: serviceName })).toBeVisible();
+	});
+
+	test('export PDF opens section dialog then print', async ({ page }) => {
+		await page.goto('/admin/stats');
+		const exportPdf = page.getByRole('button', { name: 'Export PDF' });
+		await expect(exportPdf).toBeVisible({ timeout: 20000 });
+		await expect(exportPdf).toBeEnabled();
+
+		await page.evaluate(() => {
+			(window as Window & { __printCalled?: boolean }).__printCalled = false;
+			window.print = () => {
+				(window as Window & { __printCalled?: boolean }).__printCalled = true;
+			};
+		});
+
+		await exportPdf.click();
+		await expect(page.getByText('Choose which sections to include in the PDF.')).toBeVisible({
+			timeout: 10000
+		});
+		await expect(page.getByLabel('Summary cards')).toBeChecked();
+		await expect(page.getByLabel('By person table')).toBeChecked();
+
+		await page.getByLabel('By person table').click();
+		await expect(page.getByLabel('By person table')).not.toBeChecked();
+
+		await page.getByRole('button', { name: 'Export PDF' }).last().click();
+		await expect
+			.poll(async () =>
+				page.evaluate(() => (window as Window & { __printCalled?: boolean }).__printCalled)
+			)
+			.toBe(true);
 	});
 
 	test('person drill-down loads', async ({ page }) => {
 		await page.goto(`/admin/stats/people/${personIds[0]}`);
-		await expect(page.getByRole('heading', { name: /Most Popular Service/i })).toBeVisible({
+		await expect(page.getByText(/Most popular service/i)).toBeVisible({
 			timeout: 15000
 		});
+		await expect(page.getByRole('heading', { name: /Attendance history/i })).toBeVisible();
 	});
 
 	test('service drill-down loads', async ({ page }) => {

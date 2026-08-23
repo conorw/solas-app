@@ -42,7 +42,7 @@ test.describe('attendance', () => {
 		attendanceIds.push(att['Auto ID']);
 
 		await page.goto(`/attendance?date=${date}`);
-		await expect(page.locator('.mdc-card').filter({ hasText: person.FirstName })).toBeVisible({
+		await expect(page.locator('.attendee-row').filter({ hasText: person.FirstName })).toBeVisible({
 			timeout: 15000
 		});
 	});
@@ -62,12 +62,14 @@ test.describe('attendance', () => {
 		attendanceIds.push(att['Auto ID']);
 
 		await page.goto(`/attendance?date=${date}`);
-		const card = page.locator('.mdc-card').filter({ hasText: person.FirstName });
-		await expect(card).toBeVisible({ timeout: 15000 });
-		await card.locator('.material-icons', { hasText: 'delete' }).click();
-		await expect(page.locator('.mdc-card').filter({ hasText: person.FirstName })).toHaveCount(0, {
-			timeout: 10000
-		});
+		const row = page.locator('.attendee-row').filter({ hasText: person.FirstName });
+		await expect(row).toBeVisible({ timeout: 15000 });
+		page.once('dialog', (dialog) => dialog.accept());
+		await row.getByRole('button', { name: /remove attendee/i }).click();
+		await expect(page.locator('.attendee-row').filter({ hasText: person.FirstName })).toHaveCount(
+			0,
+			{ timeout: 10000 }
+		);
 	});
 
 	test('multi attendance fixture appears as Multi row', async ({ page }) => {
@@ -89,8 +91,8 @@ test.describe('attendance', () => {
 		attendanceIds.push(att['Auto ID']);
 
 		await page.goto(`/attendance?date=${date}`);
-		await expect(
-			page.locator('.mdc-card').filter({ hasText: `${service.Name} (Multi)` })
-		).toBeVisible({ timeout: 15000 });
+		const row = page.locator('.attendee-row').filter({ hasText: service.Name! });
+		await expect(row).toBeVisible({ timeout: 15000 });
+		await expect(row.getByText(/multi event/i)).toBeVisible();
 	});
 });
