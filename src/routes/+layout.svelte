@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { refreshAll } from '$app/navigation';
-	import Button from '@smui/button';
+	import Button, { Label, Icon as ButtonIcon } from '@smui/button';
 	import IconButton from '@smui/icon-button';
 	import { Icon } from '@smui/common';
 	import { onMount } from 'svelte';
@@ -72,8 +72,11 @@
 						><Icon class="material-icons">merge_type</Icon></IconButton
 					>
 				{/if}
-				<form action="/logout" method="POST" use:enhance={submitLogout}>
-					<Button type="submit">Logout {data?.session?.user?.email}</Button>
+				<form action="/logout" method="POST" use:enhance={submitLogout} class="logout-form">
+					<Button type="submit" aria-label="Logout">
+						<ButtonIcon class="material-icons">logout</ButtonIcon>
+						<span class="logout-email">{data?.session?.user?.email}</span>
+					</Button>
 				</form>
 			</Section>
 		{/if}
@@ -81,3 +84,19 @@
 </TopAppBar>
 
 {@render children?.()}
+
+<style>
+	.logout-email {
+		margin-left: 0.35rem;
+		max-width: 12rem;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	@media (max-width: 900px) {
+		.logout-email {
+			display: none;
+		}
+	}
+</style>

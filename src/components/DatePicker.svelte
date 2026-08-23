@@ -181,18 +181,40 @@
 
 <style>
 	.solas-datepicker {
+		--dp-surface: var(--mdc-theme-surface, #fff);
+		--dp-on-surface: var(--mdc-theme-on-surface, #222);
+		--dp-muted: color-mix(in srgb, var(--dp-on-surface) 55%, transparent);
+		--dp-border: color-mix(in srgb, var(--dp-on-surface) 16%, transparent);
+		--dp-day-hover: color-mix(in srgb, var(--dp-on-surface) 8%, transparent);
+		--dp-day-outside-bg: color-mix(in srgb, var(--dp-on-surface) 6%, transparent);
+		--dp-primary: var(--mdc-theme-primary, #ff6a00);
+		--dp-on-primary: var(--mdc-theme-on-primary, #fff);
+		--dp-sidebar-bg: #111;
+		--dp-sidebar-fg: #fff;
+		--dp-shadow: 0 8px 28px rgba(0, 0, 0, 0.22);
+
 		position: relative;
 		display: inline-block;
 		font-family: Roboto, system-ui, sans-serif;
+		color: var(--dp-on-surface);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		.solas-datepicker {
+			--dp-surface: var(--mdc-theme-surface, #212121);
+			--dp-on-surface: var(--mdc-theme-on-surface, #fff);
+			--dp-sidebar-bg: #0a0a0a;
+			--dp-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
+		}
 	}
 
 	.solas-datepicker__trigger {
 		min-width: 7.5rem;
 		padding: 0.45rem 0.65rem;
-		border: 1px solid rgba(103, 113, 137, 0.35);
+		border: 1px solid var(--dp-border);
 		border-radius: 3px;
-		background: #fff;
-		color: #222;
+		background: var(--dp-surface);
+		color: var(--dp-on-surface);
 		font: inherit;
 		font-size: 0.95rem;
 		text-align: left;
@@ -201,8 +223,8 @@
 
 	.solas-datepicker__trigger:focus-visible {
 		outline: none;
-		border-color: #ff6a00;
-		box-shadow: 0 0 0 2px rgba(255, 106, 0, 0.35);
+		border-color: var(--dp-primary);
+		box-shadow: 0 0 0 2px color-mix(in srgb, var(--dp-primary) 35%, transparent);
 	}
 
 	.solas-datepicker__popup {
@@ -213,15 +235,17 @@
 		display: grid;
 		grid-template-columns: minmax(22rem, 1fr) 9rem;
 		width: min(40rem, calc(100vw - 1.5rem));
-		background: #fff;
+		background: var(--dp-surface);
+		color: var(--dp-on-surface);
+		border: 1px solid var(--dp-border);
 		border-radius: 2px;
-		box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22);
+		box-shadow: var(--dp-shadow);
 		overflow: hidden;
 	}
 
 	.solas-datepicker__calendar {
 		padding: 0.75rem 0.85rem 1rem;
-		background: #fff;
+		background: var(--dp-surface);
 	}
 
 	.solas-datepicker__header {
@@ -235,7 +259,7 @@
 		text-align: center;
 		font-size: 1.05rem;
 		font-weight: 500;
-		color: #3a3a3a;
+		color: var(--dp-on-surface);
 	}
 
 	.solas-datepicker__nav {
@@ -248,12 +272,13 @@
 		border: none;
 		border-radius: 50%;
 		background: transparent;
-		color: #555;
+		color: var(--dp-muted);
 		cursor: pointer;
 	}
 
 	.solas-datepicker__nav:hover {
-		background: rgba(0, 0, 0, 0.06);
+		background: var(--dp-day-hover);
+		color: var(--dp-on-surface);
 	}
 
 	.solas-datepicker__weekdays,
@@ -266,7 +291,7 @@
 		padding: 0.35rem 0;
 		text-align: center;
 		font-size: 0.78rem;
-		color: #9a9a9a;
+		color: var(--dp-muted);
 	}
 
 	.solas-datepicker__day {
@@ -274,29 +299,29 @@
 		min-height: 3.4rem;
 		margin: 0;
 		padding: 0;
-		border: 1px solid #ececec;
+		border: 1px solid var(--dp-border);
 		margin-right: -1px;
 		margin-bottom: -1px;
-		background: #fff;
-		color: #333;
+		background: var(--dp-surface);
+		color: var(--dp-on-surface);
 		font: inherit;
 		font-size: 1.15rem;
 		cursor: pointer;
 	}
 
 	.solas-datepicker__day:hover:not(:disabled):not(.solas-datepicker__day--selected) {
-		background: #f5f5f5;
+		background: var(--dp-day-hover);
 	}
 
 	.solas-datepicker__day--outside {
-		color: #b0b0b0;
-		background: #f3f3f3;
+		color: var(--dp-muted);
+		background: var(--dp-day-outside-bg);
 	}
 
 	.solas-datepicker__day--selected {
-		background: #ff6a00;
-		border-color: #ff6a00;
-		color: #fff;
+		background: var(--dp-primary);
+		border-color: var(--dp-primary);
+		color: var(--dp-on-primary);
 		font-weight: 600;
 		z-index: 1;
 	}
@@ -308,8 +333,8 @@
 
 	.solas-datepicker__sidebar {
 		position: relative;
-		background: #111;
-		color: #fff;
+		background: var(--dp-sidebar-bg);
+		color: var(--dp-sidebar-fg);
 		padding: 1.25rem 0.85rem 1rem;
 		min-height: 100%;
 	}
@@ -320,7 +345,7 @@
 		left: 0;
 		right: 0;
 		height: 0.45rem;
-		background: #ff6a00;
+		background: var(--dp-primary);
 	}
 
 	.solas-datepicker__sidebar-date {

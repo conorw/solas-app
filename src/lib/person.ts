@@ -14,12 +14,28 @@ type PersonNameFields = {
 	'Acupuncture Data'?: unknown;
 };
 
-export function getPersonName(person: PersonNameFields | null | undefined): string {
+export function getPersonDisplayName(person: PersonNameFields | null | undefined): string {
+	if (!person) return '';
+	return `${capitalizeFirstLetter(person.FirstName)} ${
+		capitalizeFirstLetter(person.LastName) || ''
+	}`.trim();
+}
+
+export function getPersonMeta(person: PersonNameFields | null | undefined): string {
 	if (!person) return '';
 	const birthYear = person.DateOfBirth
 		? DateTime.fromISO(person.DateOfBirth).toFormat('yyyy')
 		: 'N/A';
-	return `${capitalizeFirstLetter(person.FirstName)} ${
-		capitalizeFirstLetter(person.LastName) || ''
-	} (b.${birthYear}) (Acupuncture:${person['Acupuncture Data'] || false})`;
+	const parts = [`b.${birthYear}`];
+	if (person['Acupuncture Data']) {
+		parts.push('Acupuncture');
+	}
+	return parts.join(' · ');
+}
+
+/** Full label used where a single string is required (e.g. admin merge confirmations). */
+export function getPersonName(person: PersonNameFields | null | undefined): string {
+	if (!person) return '';
+	const meta = getPersonMeta(person);
+	return meta ? `${getPersonDisplayName(person)} (${meta})` : getPersonDisplayName(person);
 }
