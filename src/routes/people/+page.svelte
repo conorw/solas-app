@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { person } from '$lib/types/rows';
+	import type { person } from '#lib/types/rows.js';
 	import DataTable, { Head, Body, Row, Cell, Label } from '@smui/data-table';
 	import LayoutGrid, { Cell as GridCell } from '@smui/layout-grid';
 	import Button, { Icon } from '@smui/button';
@@ -8,6 +8,7 @@
 	import { DateTime } from 'luxon';
 	import type { PageData } from './$types';
 	import IconButton from '@smui/icon-button';
+	import { Icon as CommonIcon } from '@smui/common';
 	interface Props {
 		data: PageData;
 	}
@@ -26,39 +27,45 @@
 	let people = $state(data.people);
 
 	async function deletePerson(person: person) {
-		// show a confirmation dialog
 		if (
-			confirm(
+			!confirm(
 				`Are you sure you want to entirely delete ${person.FirstName} ${person.LastName} (userid: ${person['Auto ID']}) from the system? Warning: This will also delete all attendance records for this person!`
 			)
 		) {
-			// delete the attendance records and then the person
-			const deleteAttendance = await data.supabase
-				.from('attendance')
-				.delete()
-				.match({ 'Person Id': person['Auto ID'] });
-
-			if (deleteAttendance.status !== 204) {
-				snackMessage = `Error deleting attendance records for this person: ${deleteAttendance.error?.message}`;
-				snackbarWithoutClose.open();
-				return;
-			}
-			// delete the person
-			const ret = await data.supabase
-				.from('people')
-				.delete()
-				.match({ 'Auto ID': person['Auto ID'] });
-			if (ret.status !== 204) {
-				snackMessage = `Error deleting this person: ${ret.error?.message}`;
-				snackbarWithoutClose.open();
-				return;
-			} else {
-				snackMessage = `Person ${person.FirstName} ${person.LastName} deleted successfully`;
-				snackbarWithoutClose.open();
-				// remove the person from the list
-				people = people.filter((p) => p['Auto ID'] !== person['Auto ID']);
-			}
+			return;
 		}
+
+		const deleteAttendance = await data.supabase
+			.from('attendance')
+			.delete()
+			.eq('Person Id', person['Auto ID']);
+
+		if (deleteAttendance.error) {
+			snackMessage = `Error deleting attendance records for this person: ${deleteAttendance.error.message}`;
+			snackbarWithoutClose.open();
+			return;
+		}
+
+		const ret = await data.supabase
+			.from('people')
+			.delete()
+			.eq('Auto ID', person['Auto ID'])
+			.select('"Auto ID"');
+
+		if (ret.error) {
+			snackMessage = `Error deleting this person: ${ret.error.message}`;
+			snackbarWithoutClose.open();
+			return;
+		}
+		if (!ret.data?.length) {
+			snackMessage = `Error deleting this person: no matching row was deleted`;
+			snackbarWithoutClose.open();
+			return;
+		}
+
+		snackMessage = `Person ${person.FirstName} ${person.LastName} deleted successfully`;
+		snackbarWithoutClose.open();
+		people = people.filter((p) => p['Auto ID'] != person['Auto ID']);
 	}
 </script>
 
@@ -93,11 +100,11 @@
 					<!-- 
 					<Cell columnId="username">
 						<Label>Username</Label>
-						<IconButton class="material-icons">arrow_upward</IconButton>
+						<IconButton ><CommonIcon class="material-icons">arrow_upward</CommonIcon></IconButton>
 					</Cell>
 					<Cell columnId="email">
 						<Label>Email</Label>
-						<IconButton class="material-icons">arrow_upward</IconButton>
+						<IconButton ><CommonIcon class="material-icons">arrow_upward</CommonIcon></IconButton>
 					</Cell> -->
 					<!-- You can turn off sorting for a column. -->
 					<!-- <Cell sortable={false}>Website</Cell> -->
@@ -114,8 +121,13 @@
 
 						<Cell><a href={`/people/${item['Auto ID']}`}>Edit</a></Cell>
 						<Cell
-							><IconButton class="material-icons" onclick={() => deletePerson(item)}
-								>delete</IconButton
+							><IconButton
+								type="button"
+								aria-label="Delete person"
+								data-testid="delete-person"
+								onclick={() => deletePerson(item)}
+								><CommonIcon class="material-icons" aria-hidden="true">delete</CommonIcon
+								></IconButton
 							></Cell
 						>
 						{#if data.profile?.isAdmin}

@@ -3,8 +3,8 @@
 	import { Label } from '@smui/tab';
 	import Button from '@smui/button';
 	import type { PageServerData } from './$types';
-	import { page } from '$app/stores';
-	import { exportData } from '$lib/types/utils';
+	import { page } from '$app/state';
+	import { exportData } from '#lib/types/utils.js';
 	interface Props {
 		data: PageServerData;
 	}
@@ -15,7 +15,7 @@
 </script>
 
 {#if stats}
-	<h2>{$page?.params?.serviceId}</h2>
+	<h2>{page?.params?.serviceId}</h2>
 	<h3>From date: {data.fromDate}</h3>
 	<h3>To date: {data.toDate}</h3>
 	<h4>Total Sessions: {data.stats.length}</h4>
@@ -30,7 +30,7 @@
 					...item[1][0].people
 				};
 			});
-			exportData(flatData, `${$page?.params?.serviceId}.csv`);
+			exportData(flatData, `${page?.params?.serviceId}.csv`);
 		}}
 		variant="unelevated"
 		class="button-shaped-round"

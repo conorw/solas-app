@@ -1,11 +1,12 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import type { person } from '$lib/types/rows';
+	import type { person } from '#lib/types/rows.js';
 	import Autocomplete from '@smui-extra/autocomplete';
 	import Button, { Icon, Label } from '@smui/button';
 	import LayoutGrid, { Cell } from '@smui/layout-grid';
 	import Snackbar from '@smui/snackbar';
 	import IconButton from '@smui/icon-button';
+	import { Icon as CommonIcon } from '@smui/common';
 	import Dialog, { Title, Content, Actions } from '@smui/dialog';
 	import { DateTime } from 'luxon';
 	import { enhance } from '$app/forms';
@@ -249,12 +250,11 @@
 						label="Start Typing Person Name"
 					/>
 					<IconButton
-						class="material-icons"
-						onclick={() => (primaryPerson = undefined)}
+					onclick={() => (primaryPerson = undefined)}
 						aria-label="Clear primary person"
-					>
-						clear
-					</IconButton>
+				>
+					<CommonIcon class="material-icons">clear</CommonIcon>
+				</IconButton>
 					{#if primaryPerson}
 						<p>Selected: {getPersonName(primaryPerson)}</p>
 					{/if}
@@ -272,12 +272,11 @@
 						label="Start Typing Person Name"
 					/>
 					<IconButton
-						class="material-icons"
-						onclick={() => (secondaryPerson = undefined)}
+					onclick={() => (secondaryPerson = undefined)}
 						aria-label="Clear secondary person"
-					>
-						clear
-					</IconButton>
+				>
+					<CommonIcon class="material-icons">clear</CommonIcon>
+				</IconButton>
 					{#if secondaryPerson}
 						<p>Selected: {getPersonName(secondaryPerson)}</p>
 					{/if}

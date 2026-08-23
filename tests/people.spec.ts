@@ -65,8 +65,10 @@ test.describe('people', () => {
 	});
 
 	test('edit person and delete person', async ({ page }) => {
+		test.setTimeout(120_000);
+		const firstName = `${prefix}-Edit`;
 		const person = await createPerson(prefix, {
-			FirstName: `${prefix}-Edit`,
+			FirstName: firstName,
 			LastName: 'Me'
 		});
 		personIds.push(person['Auto ID']);
@@ -91,16 +93,32 @@ test.describe('people', () => {
 			.toBe('Updated');
 
 		await page.goto('/people', { waitUntil: 'domcontentloaded' });
-		await expect(page.getByRole('cell', { name: `${prefix}-Edit`, exact: true })).toBeVisible({
-			timeout: 15000
-		});
+		const row = page.locator('tr', { hasText: firstName });
+		await expect(row).toBeVisible({ timeout: 15000 });
 
-		page.once('dialog', (d) => d.accept());
-		const row = page.locator('tr', { hasText: `${prefix}-Edit` });
-		await row.locator('.material-icons', { hasText: 'delete' }).click();
-		await expect(page.getByRole('cell', { name: `${prefix}-Edit`, exact: true })).toHaveCount(0, {
-			timeout: 15000
-		});
+		const deleteBtn = row.getByRole('button', { name: 'Delete person' });
+		await deleteBtn.scrollIntoViewIfNeeded();
+		await Promise.all([
+			page.waitForEvent('dialog').then((d) => d.accept()),
+			deleteBtn.click()
+		]);
+
+		await expect(page.getByText(/deleted successfully/i)).toBeVisible({ timeout: 15000 });
+		await expect(row).toHaveCount(0, { timeout: 10000 });
+
+		await expect
+			.poll(
+				async () => {
+					const { data } = await sb
+						.from('people')
+						.select('"Auto ID"')
+						.eq('Auto ID', person['Auto ID'])
+						.maybeSingle();
+					return data;
+				},
+				{ timeout: 20000 }
+			)
+			.toBeNull();
 		personIds.pop();
 	});
 });

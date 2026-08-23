@@ -6,7 +6,7 @@
 	import TabBar from '@smui/tab-bar';
 	import type { PageServerData } from './$types';
 	import PersonForm from '../../../../../components/PersonForm.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	interface Props {
 		data: PageServerData;
 	}
@@ -87,7 +87,7 @@
 	{/if}
 	{#if active === 'details'}
 		<PersonForm
-			supabase={$page.data.supabase}
+			supabase={page.data.supabase}
 			onSave={() => history.back()}
 			person={data?.person}
 		/>

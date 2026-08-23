@@ -1,10 +1,10 @@
-<!-- @migration-task Error while migrating Svelte code: Identifier 'person' has already been declared -->
 <script lang="ts">
-	import type { person } from '$lib/types/rows';
+	import type { person as PersonRow } from '#lib/types/rows.js';
 	import LayoutGrid, { Cell } from '@smui/layout-grid';
 	import Snackbar, { Actions } from '@smui/snackbar';
 	import IconButton from '@smui/icon-button';
 	import Button, { Icon } from '@smui/button';
+	import { Icon as CommonIcon } from '@smui/common';
 	import Select, { Option } from '@smui/select';
 	import Textfield from '@smui/textfield';
 	import { DateTime } from 'luxon';
@@ -14,7 +14,7 @@
 	let snackbar: Snackbar;
 	let text = 'Saved.';
 	import { Label } from '@smui/list';
-	export let person: person;
+	export let person: PersonRow;
 	export let onSave: any;
 	export let supabase: any;
 
@@ -248,6 +248,8 @@
 <Snackbar bind:this={snackbar} timeoutMs={-1}>
 	<Label>{text}</Label>
 	<Actions>
-		<IconButton class="material-icons" title="Dismiss">close</IconButton>
+		<IconButton title="Dismiss">
+			<CommonIcon class="material-icons">close</CommonIcon>
+		</IconButton>
 	</Actions>
 </Snackbar>

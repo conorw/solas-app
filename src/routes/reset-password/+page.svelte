@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto, invalidateAll } from '$app/navigation';
+	import { goto, refreshAll } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
 
@@ -34,7 +34,7 @@
 					return;
 				}
 				window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
-				await invalidateAll();
+				await refreshAll();
 				sessionReady = true;
 				return;
 			}
@@ -65,7 +65,7 @@
 			error = err.message;
 			return;
 		}
-		await invalidateAll();
+		await refreshAll();
 		goto('/');
 	}
 </script>

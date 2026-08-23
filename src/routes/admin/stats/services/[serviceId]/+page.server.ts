@@ -1,7 +1,7 @@
-import type { attendance } from '$lib/types/rows';
+import type { attendance } from '#lib/types/rows.js';
 import { DateTime } from 'luxon';
 import type { PageServerLoad } from './$types';
-import { expandMultiAttendance, groupBy } from '$lib/stats';
+import { expandMultiAttendance, groupBy } from '#lib/stats.js';
 
 export const load: PageServerLoad = async ({ params, url, locals }) => {
 	const serviceName: string = params.serviceId;

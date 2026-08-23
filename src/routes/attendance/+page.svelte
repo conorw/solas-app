@@ -5,8 +5,9 @@
 	import Textfield from '@smui/textfield';
 	import List, { Item, PrimaryText } from '@smui/list';
 	import IconButton from '@smui/icon-button';
+	import { Icon } from '@smui/common';
 	import Button, { Label } from '@smui/button';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import LayoutGrid, { Cell } from '@smui/layout-grid';
 	import Card, { Actions, Content } from '@smui/card';
 	import { DateTime } from 'luxon';
@@ -175,8 +176,9 @@
 				// selectedDate = e;
 				if (e !== selectedDate) {
 					selectedDate = e;
-					$page.url.searchParams.set('date', DateTime.fromJSDate(e).toFormat('yyyy-MM-dd'));
-					goto($page.url.pathname + '?' + $page.url.searchParams.toString());
+					const url = new URL(page.url.href);
+					url.searchParams.set('date', DateTime.fromJSDate(e).toFormat('yyyy-MM-dd'));
+					goto(`${url.pathname}?${url.searchParams}`);
 					updateAttendance(DateTime.fromJSDate(e).toFormat('yyyy-MM-dd'));
 				}
 			}}
@@ -191,9 +193,9 @@
 			bind:value={selectedPerson}
 			label="Start Typing Person Name"
 		/>
-		<IconButton class="material-icons" onclick={() => (selectedPerson = undefined)}
-			>clear</IconButton
-		>
+		<IconButton onclick={() => (selectedPerson = undefined)}>
+			<Icon class="material-icons">clear</Icon>
+		</IconButton>
 
 		<div>
 			<Autocomplete
@@ -214,9 +216,9 @@
 				bind:value={selectedService}
 				label="Choose a Service"
 			/>
-			<IconButton class="material-icons" onclick={() => (selectedService = undefined)}
-				>clear</IconButton
-			>
+			<IconButton onclick={() => (selectedService = undefined)}>
+			<Icon class="material-icons">clear</Icon>
+		</IconButton>
 		</div>
 		<div>
 			<Button onclick={addAttendee} variant="raised">
@@ -245,7 +247,7 @@
 			<LayoutGrid style="min-height:600px;max-height:70vh;overflow:auto">
 				{#each attendance as attend}
 					<Cell>
-						<!-- <IconButton class="material-icons" onclick={() => {}}>delete</IconButton>
+						<!-- <IconButton class="material-icons" onclick={() => {}}>delete</Icon></Icon></IconButton>
 							<Text>
 								<PrimaryText>{attend['Person Name']}</PrimaryText>
 								<SecondaryText>{attend['ServiceName']}</SecondaryText>
@@ -255,8 +257,7 @@
 								{#if attend.Multi}
 									<PrimaryText
 										>{attend['ServiceName']} (Multi)<IconButton
-											class="material-icons"
-											onclick={() => deleteAttendance(attend['Auto ID'])}>delete</IconButton
+							onclick={() => deleteAttendance(attend['Auto ID'])}><Icon class="material-icons">delete</Icon></IconButton
 										></PrimaryText
 									>
 									<Textfield
@@ -270,8 +271,7 @@
 										style="text-wrap: pretty"
 										>{attend['Person Name']}
 										<IconButton
-											class="material-icons"
-											onclick={() => deleteAttendance(attend['Auto ID'])}>delete</IconButton
+							onclick={() => deleteAttendance(attend['Auto ID'])}><Icon class="material-icons">delete</Icon></IconButton
 										></PrimaryText
 									>
 									<Select

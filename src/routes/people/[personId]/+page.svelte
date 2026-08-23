@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import PersonForm from '../../../components/PersonForm.svelte';
 	import type { PageData } from './$types';
 	interface Props {
@@ -9,4 +9,8 @@
 	let { data }: Props = $props();
 </script>
 
-<PersonForm supabase={$page.data.supabase} onSave={() => history.back()} person={data?.person} />
+<PersonForm
+	supabase={page.data.supabase}
+	onSave={() => history.back()}
+	person={data?.person}
+/>

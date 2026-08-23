@@ -1,4 +1,4 @@
-import type { attendance } from '$lib/types/rows';
+import type { attendance } from '#lib/types/rows.js';
 import { DateTime } from 'luxon';
 import type { PageServerLoad } from './$types';
 import {
@@ -6,7 +6,7 @@ import {
 	groupBy,
 	monthKey,
 	popularServiceLabel
-} from '$lib/stats';
+} from '#lib/stats.js';
 
 export const load: PageServerLoad = async ({ url, locals }) => {
 	const fromDate: string =

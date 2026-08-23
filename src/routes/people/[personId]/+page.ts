@@ -2,7 +2,7 @@
 
 
 
-import type { person } from '$lib/types/rows';
+import type { person } from '#lib/types/rows.js';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ params, url, parent }) => {

@@ -1,10 +1,9 @@
-<!-- @migration-task Error while migrating Svelte code: Identifier 'person' has already been declared -->
 <script lang="ts">
-	import { page } from '$app/stores';
-	import type { person } from '$lib/types/rows';
+	import { page } from '$app/state';
+	import type { person as PersonRow } from '#lib/types/rows.js';
 	import PersonForm from '../../../components/PersonForm.svelte';
 
-	let person: person = {
+	let person: PersonRow = {
 		FirstName: '',
 		LastName: '',
 		DateOfBirth: '1980-01-01',
@@ -40,4 +39,4 @@
 	};
 </script>
 
-<PersonForm supabase={$page.data.supabase} {person} onSave={() => history.back()} />
+<PersonForm supabase={page.data.supabase} {person} onSave={() => history.back()} />

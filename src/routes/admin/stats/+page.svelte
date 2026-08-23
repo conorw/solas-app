@@ -5,11 +5,11 @@
 
 	import { BarChartSimple } from '@carbon/charts-svelte';
 	import DatePicker from '../../../components/DatePicker.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { DateTime } from 'luxon';
 	import type { PageServerData } from './$types';
 	import { goto } from '$app/navigation';
-	import { exportData } from '$lib/types/utils';
+	import { exportData } from '#lib/types/utils.js';
 	interface Props {
 		data: PageServerData;
 	}
@@ -24,10 +24,11 @@
 		// selectedDate = e;
 		if (DateTime.fromJSDate(e).toFormat('yyyy-MM-dd') !== data.fromDate) {
 			data.fromDate = DateTime.fromJSDate(e).toFormat('yyyy-MM-dd');
-			$page.url.searchParams.set('fromDate', data.fromDate);
-			await goto($page.url.pathname + '?' + $page.url.searchParams.toString(), {
-				replaceState: true,
-				invalidateAll: true
+			const fromUrl = new URL(page.url.href);
+			fromUrl.searchParams.set('fromDate', data.fromDate);
+			await goto(`${fromUrl.pathname}?${fromUrl.searchParams}`, {
+				replace: true,
+				refreshAll: true
 			});
 		}
 	}}
@@ -38,8 +39,9 @@
 		// selectedDate = e;
 		if (DateTime.fromJSDate(e).toFormat('yyyy-MM-dd') !== data.toDate) {
 			data.toDate = DateTime.fromJSDate(e).toFormat('yyyy-MM-dd');
-			$page.url.searchParams.set('toDate', data.toDate);
-			goto($page.url.pathname + '?' + $page.url.searchParams.toString(), { invalidateAll: true });
+			const toUrl = new URL(page.url.href);
+			toUrl.searchParams.set('toDate', data.toDate);
+			goto(`${toUrl.pathname}?${toUrl.searchParams}`, { refreshAll: true });
 		}
 	}}
 	selected={new Date(data.toDate)}
@@ -47,7 +49,7 @@
 
 <Button
 	onclick={async () => {
-		const peopleData = await $page.data.supabase.from('people').select('*');
+		const peopleData = await page.data.supabase.from('people').select('*');
 
 		exportData(peopleData.data, 'people.csv');
 	}}

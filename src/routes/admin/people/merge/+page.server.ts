@@ -1,6 +1,6 @@
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import type { person } from '$lib/types/rows';
+import type { person } from '#lib/types/rows.js';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	// Load all people for selection

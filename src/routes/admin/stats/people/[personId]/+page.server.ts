@@ -1,6 +1,6 @@
-import type { attendance, person } from '$lib/types/rows';
+import type { attendance, person } from '#lib/types/rows.js';
 import type { PageServerLoad } from './$types';
-import { groupBy, monthKey, popularServiceLabel } from '$lib/stats';
+import { groupBy, monthKey, popularServiceLabel } from '#lib/stats.js';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const personId: string = params.personId;

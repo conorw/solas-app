@@ -1,6 +1,6 @@
 <!-- @migration-task Error while migrating Svelte code: Identifier 'service' has already been declared -->
 <script lang="ts">
-	import type { service } from '$lib/types/rows';
+	import type { service } from '#lib/types/rows.js';
 	import DataTable, { Head, Body, Row, Cell, Label } from '@smui/data-table';
 	import FormField from '@smui/form-field';
 	import LayoutGrid, { Cell as GridCell } from '@smui/layout-grid';

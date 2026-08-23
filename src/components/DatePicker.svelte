@@ -1,32 +1,27 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
-
-	import { Datepicker } from 'svelte-calendar';
-
-	// const theme = {
-	// 	calendar: {
-	// 		width: '600px',
-	// 		shadow: '0px 0px 5px rgba(0, 0, 0, 0.25)',
-	//         colors: {
-	// 			background: {
-	// 				highlight: '#68B096'
-	// 			}
-	// 		}
-	// 	}
-	// };
-
-	let store: any = $state();
+	import { DateTime } from 'luxon';
 
 	interface Props {
-		onChange: any;
+		onChange: (date: Date) => void;
 		selected: Date;
 	}
 
 	let { onChange, selected = $bindable() }: Props = $props();
 
-	run(() => {
-		$store?.selected ? onChange($store?.selected) : () => {};
+	let value = $state(DateTime.fromJSDate(selected).toFormat('yyyy-MM-dd'));
+
+	$effect(() => {
+		value = DateTime.fromJSDate(selected).toFormat('yyyy-MM-dd');
 	});
+
+	function handleInput(event: Event) {
+		const next = (event.currentTarget as HTMLInputElement).value;
+		if (!next) return;
+		value = next;
+		const date = DateTime.fromISO(next).toJSDate();
+		selected = date;
+		onChange(date);
+	}
 </script>
 
-<Datepicker format={'DD/MM/YYYY'} {selected} bind:store />
+<input type="date" {value} oninput={handleInput} />
