@@ -59,6 +59,10 @@
 		query = (event.currentTarget as HTMLInputElement).value;
 	}
 
+	function onNameInput(event: Event) {
+		newItem.Name = (event.currentTarget as HTMLInputElement).value;
+	}
+
 	function openAddDialog() {
 		newItem = { Name: '', 'Is Current': true, Multi: false };
 		formError = '';
@@ -66,7 +70,6 @@
 	}
 
 	async function updateFlag(item: ServiceRow, field: 'Is Current' | 'Multi', checked: boolean) {
-		item[field] = checked;
 		const ret = await data.supabase
 			.from('service')
 			.update({ [field]: checked })
@@ -74,18 +77,20 @@
 		if (ret.error) {
 			item[field] = !checked;
 			showSnack(`Could not update ${item.Name}: ${ret.error.message}`);
+			return;
 		}
+		servicesOverride = (servicesOverride ?? allServices).map((row) =>
+			row['Auto ID'] === item['Auto ID'] ? { ...row, [field]: checked } : row
+		);
 	}
 
 	async function onCurrentChange(item: ServiceRow, e: Event) {
 		const checked = (e.currentTarget as HTMLInputElement).checked;
-		item['Is Current'] = checked;
 		await updateFlag(item, 'Is Current', checked);
 	}
 
 	async function onMultiChange(item: ServiceRow, e: Event) {
 		const checked = (e.currentTarget as HTMLInputElement).checked;
-		item.Multi = checked;
 		await updateFlag(item, 'Multi', checked);
 	}
 
@@ -120,9 +125,16 @@
 <div class="service-page">
 	<header class="service-toolbar">
 		<div class="service-toolbar__search">
-			<Textfield class="search-field" bind:value={query} label="Search" input$aria-label="Search" input$oninput={onSearchInput} />
+			<input
+				type="search"
+				class="search-input"
+				aria-label="Search"
+				placeholder="Search"
+				bind:value={query}
+				oninput={onSearchInput}
+			/>
 			{#if query}
-				<IconButton type="button" aria-label="Clear search" onclick={clearSearch}>
+				<IconButton type="button" aria-label="Clear" onclick={clearSearch}>
 					<CommonIcon class="material-icons">clear</CommonIcon>
 				</IconButton>
 			{/if}
@@ -131,7 +143,7 @@
 			<span class="result-count" aria-live="polite">
 				{services.length} {services.length === 1 ? 'service' : 'services'}
 			</span>
-			<Button onclick={openAddDialog} variant="unelevated" class="add-btn">
+			<Button type="button" onclick={openAddDialog} variant="unelevated" class="add-btn">
 				<Icon class="material-icons">add</Icon>
 				<Label>Add New Service</Label>
 			</Button>
@@ -161,8 +173,8 @@
 							<Cell>
 								<FormField>
 									<Checkbox
-										checked={item['Is Current']}
-										onchange={(e) => onCurrentChange(item, e)}
+										bind:checked={item['Is Current']}
+										input$onchange={(e) => onCurrentChange(item, e)}
 										input$aria-label={`Active: ${item.Name}`}
 									/>
 									{#snippet label()}Active{/snippet}
@@ -171,8 +183,8 @@
 							<Cell>
 								<FormField>
 									<Checkbox
-										checked={item.Multi}
-										onchange={(e) => onMultiChange(item, e)}
+										bind:checked={item.Multi}
+										input$onchange={(e) => onMultiChange(item, e)}
 										input$aria-label={`Multi event: ${item.Name}`}
 									/>
 									{#snippet label()}Multi{/snippet}
@@ -201,7 +213,7 @@
 	{/if}
 </div>
 
-<Dialog bind:open aria-labelledby="simple-title" aria-describedby="simple-content">
+<Dialog bind:open aria-labelledby="simple-title" aria-describedby="simple-content" role="dialog">
 	<Title id="simple-title">Add New Service</Title>
 	<Content id="simple-content">
 		<div class="dialog-body">
@@ -210,6 +222,7 @@
 				bind:value={newItem.Name}
 				label="Name"
 				input$aria-label="Service name"
+				input$oninput={onNameInput}
 			/>
 			{#if formError}
 				<p class="form-error" role="alert">{formError}</p>
@@ -269,13 +282,16 @@
 		min-width: 0;
 	}
 
-	:global(.search-field) {
+	.search-input {
 		flex: 1;
 		min-width: 0;
-	}
-
-	:global(.search-field .mdc-text-field) {
-		width: 100%;
+		min-height: 3.25rem;
+		padding: 0.75rem 1rem;
+		border: 1px solid color-mix(in srgb, currentColor 24%, transparent);
+		border-radius: 4px;
+		font: inherit;
+		background: transparent;
+		color: inherit;
 	}
 
 	.service-toolbar__actions {

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { page } from '$app/state';
 	import PersonForm from '../../../components/PersonForm.svelte';
 	import type { person as PersonRow } from '#lib/types/rows.js';
 	import type { PageData } from './$types';
@@ -9,11 +8,11 @@
 	}
 
 	let { data }: Props = $props();
-	let person = $state<PersonRow>({ ...data.person });
+	let person = $state<PersonRow>(structuredClone(data.person));
 </script>
 
 <PersonForm
-	supabase={page.data.supabase}
+	supabase={data.supabase}
 	bind:person
 	onSave={() => history.back()}
 	title="Edit person"

@@ -3,12 +3,12 @@
 	import DataTable, { Head, Body, Row, Cell, Label as TableLabel } from '@smui/data-table';
 	import Button, { Label, Icon } from '@smui/button';
 	import Snackbar from '@smui/snackbar';
-	import Textfield from '@smui/textfield';
-	import { DateTime } from 'luxon';
 	import type { PageData } from './$types';
 	import IconButton from '@smui/icon-button';
 	import { Icon as CommonIcon } from '@smui/common';
+	import { untrack } from 'svelte';
 	import { getPersonDisplayName } from '#lib/person.js';
+	import { virtualWindow } from '#lib/virtualWindow.js';
 
 	interface Props {
 		data: PageData;
@@ -20,6 +20,12 @@
 	let snackMessage = $state('');
 	/** Local override after deletes; null means use server `data.people`. */
 	let peopleOverride = $state<person[] | null>(null);
+	let panelEl = $state<HTMLDivElement | undefined>(undefined);
+	let scrollTop = $state(0);
+	let viewportHeight = $state(600);
+	let rowHeight = $state(56);
+
+	const OVERSCAN = 10;
 
 	$effect(() => {
 		data.people;
@@ -28,25 +34,62 @@
 
 	const peopleList = $derived(peopleOverride ?? data.people ?? []);
 
+	function birthYear(dob: string | null | undefined): string {
+		return dob && dob.length >= 4 ? dob.slice(0, 4) : '';
+	}
+
 	const people = $derived.by(() => {
 		const q = query.trim().toLowerCase();
 		const list = peopleList;
 		if (!q) return list;
 		return list.filter((p: person) => {
 			const name = `${p.FirstName ?? ''} ${p.LastName ?? ''}`.toLowerCase();
-			const born = p.DateOfBirth
-				? DateTime.fromISO(p.DateOfBirth).toFormat('yyyy')
-				: '';
-			return name.includes(q) || born.includes(q);
+			return name.includes(q) || birthYear(p.DateOfBirth).includes(q);
 		});
+	});
+
+	const windowed = $derived.by(() => {
+		const w = virtualWindow(people.length, scrollTop, viewportHeight, rowHeight, OVERSCAN);
+		return { ...w, items: people.slice(w.start, w.end) };
+	});
+
+	$effect(() => {
+		query;
+		untrack(() => {
+			scrollTop = 0;
+			if (panelEl) panelEl.scrollTop = 0;
+		});
+	});
+
+	$effect(() => {
+		const el = panelEl;
+		if (!el) return;
+		const ro = new ResizeObserver(() => {
+			viewportHeight = el.clientHeight;
+		});
+		ro.observe(el);
+		viewportHeight = el.clientHeight;
+		return () => ro.disconnect();
+	});
+
+	$effect(() => {
+		const el = panelEl;
+		windowed.items;
+		if (!el) return;
+		const row = el.querySelector('tbody .mdc-data-table__row');
+		if (!(row instanceof HTMLElement)) return;
+		const height = row.getBoundingClientRect().height;
+		if (height > 0 && Math.abs(height - rowHeight) > 0.5) {
+			rowHeight = height;
+		}
 	});
 
 	function clearSearch() {
 		query = '';
 	}
 
-	function onSearchInput(event: Event) {
-		query = (event.currentTarget as HTMLInputElement).value;
+	function onPanelScroll(event: Event) {
+		scrollTop = (event.currentTarget as HTMLDivElement).scrollTop;
 	}
 
 	async function deletePerson(personRow: person) {
@@ -96,15 +139,15 @@
 <div class="people-page">
 	<header class="people-toolbar">
 		<div class="people-toolbar__search">
-			<Textfield
-				class="search-field"
+			<input
+				type="search"
+				class="search-input"
+				aria-label="Search"
+				placeholder="Search"
 				bind:value={query}
-				label="Search"
-				input$aria-label="Search"
-				input$oninput={onSearchInput}
 			/>
 			{#if query}
-				<IconButton type="button" aria-label="Clear search" onclick={clearSearch}>
+				<IconButton type="button" aria-label="Clear" onclick={clearSearch}>
 					<CommonIcon class="material-icons">clear</CommonIcon>
 				</IconButton>
 			{/if}
@@ -121,10 +164,11 @@
 	</header>
 
 	{#if people.length}
-		<div class="table-panel">
+		<div class="table-panel" bind:this={panelEl} onscroll={onPanelScroll}>
 			<DataTable
 				stickyHeader
 				table$aria-label="User list"
+				table$aria-rowcount={people.length}
 				class="people-table"
 			>
 				<Head>
@@ -136,7 +180,12 @@
 					</Row>
 				</Head>
 				<Body>
-					{#each people as item (item['Auto ID'])}
+					{#if windowed.topPad > 0}
+						<tr class="virtual-spacer" aria-hidden="true">
+							<td colspan="4" style="height: {windowed.topPad}px"></td>
+						</tr>
+					{/if}
+					{#each windowed.items as item (item['Auto ID'])}
 						<Row>
 							<Cell>
 								<a class="name-link" href={`/people/${item['Auto ID']}`}>{item.FirstName}</a>
@@ -145,17 +194,11 @@
 								<a class="name-link" href={`/people/${item['Auto ID']}`}>{item.LastName}</a>
 							</Cell>
 							<Cell>
-								{item.DateOfBirth
-									? DateTime.fromISO(item.DateOfBirth).toFormat('yyyy')
-									: '—'}
+								{birthYear(item.DateOfBirth) || '—'}
 							</Cell>
 							<Cell>
 								<div class="row-actions">
-									<Button
-										href={`/people/${item['Auto ID']}`}
-										variant="outlined"
-										class="action-btn"
-									>
+									<Button href={`/people/${item['Auto ID']}`} variant="outlined" class="action-btn">
 										<Label>Edit</Label>
 									</Button>
 									{#if data.profile?.isAdmin}
@@ -180,6 +223,11 @@
 							</Cell>
 						</Row>
 					{/each}
+					{#if windowed.bottomPad > 0}
+						<tr class="virtual-spacer" aria-hidden="true">
+							<td colspan="4" style="height: {windowed.bottomPad}px"></td>
+						</tr>
+					{/if}
 				</Body>
 			</DataTable>
 		</div>
@@ -236,13 +284,16 @@
 		min-width: 0;
 	}
 
-	:global(.search-field) {
+	.search-input {
 		flex: 1;
 		min-width: 0;
-	}
-
-	:global(.search-field .mdc-text-field) {
-		width: 100%;
+		min-height: 3.25rem;
+		padding: 0.75rem 1rem;
+		border: 1px solid color-mix(in srgb, currentColor 24%, transparent);
+		border-radius: 4px;
+		font: inherit;
+		background: transparent;
+		color: inherit;
 	}
 
 	.people-toolbar__actions {
@@ -274,6 +325,18 @@
 
 	:global(.people-table) {
 		width: 100%;
+		overflow: visible;
+	}
+
+	:global(.people-table .mdc-data-table__table-container) {
+		overflow: visible;
+	}
+
+	:global(.people-table .virtual-spacer td) {
+		padding: 0;
+		border: none;
+		line-height: 0;
+		font-size: 0;
 	}
 
 	:global(.people-table .mdc-data-table__row) {
@@ -331,13 +394,6 @@
 		p {
 			margin: 0;
 			font-size: 1.1rem;
-		}
-	}
-
-	@media (max-width: 640px) {
-		.row-actions {
-			flex-wrap: wrap;
-			justify-content: flex-start;
 		}
 	}
 

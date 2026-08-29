@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { loadEnv } from './helpers/env';
 import { cleanupFixtures, createService, runId } from './helpers/fixtures';
 import { getServiceClient } from './helpers/supabase';
+import { fillTextField } from './helpers/smui';
 
 loadEnv();
 
@@ -21,7 +22,7 @@ test.describe('admin services', () => {
 		await page.goto('/admin/service');
 		await expect(page.getByText(svc.Name!)).toBeVisible({ timeout: 15000 });
 
-		await page.getByLabel('Search').fill(`${prefix}-Listed`);
+		await fillTextField(page.getByRole('searchbox', { name: 'Search' }), `${prefix}-Listed`);
 		await expect(page.getByText(svc.Name!)).toBeVisible();
 	});
 
@@ -31,10 +32,9 @@ test.describe('admin services', () => {
 
 		await page.goto('/admin/service');
 		await page.getByRole('button', { name: /add new service/i }).click();
-		const dialog = page.getByRole('dialog', { name: /add new service/i });
-		await expect(dialog).toBeVisible();
-		await dialog.getByLabel('Service name').fill(name);
-		await dialog.getByRole('button', { name: /^save$/i }).click();
+		await expect(page.locator('.mdc-dialog--open')).toBeVisible();
+		await fillTextField(page.getByLabel('Service name'), name);
+		await page.getByRole('button', { name: /^save$/i }).click();
 		await expect(page.locator('.service-name', { hasText: name })).toBeVisible({
 			timeout: 15000
 		});
@@ -53,12 +53,12 @@ test.describe('admin services', () => {
 		const sb = getServiceClient();
 
 		await page.goto('/admin/service');
-		await page.getByLabel('Search').fill(`${prefix}-Toggle`);
+		await fillTextField(page.getByRole('searchbox', { name: 'Search' }), `${prefix}-Toggle`);
 		const row = page.locator('tr', { hasText: `${prefix}-Toggle` });
 		await expect(row).toBeVisible({ timeout: 15000 });
 		const checkbox = row.getByRole('checkbox', { name: new RegExp(`Active: ${prefix}-Toggle`, 'i') });
 		await expect(checkbox).toBeChecked();
-		await checkbox.click();
+		await checkbox.uncheck();
 
 		await expect
 			.poll(
@@ -75,7 +75,7 @@ test.describe('admin services', () => {
 			.toBe(false);
 
 		await page.reload();
-		await page.getByLabel('Search').fill(`${prefix}-Toggle`);
+		await fillTextField(page.getByRole('searchbox', { name: 'Search' }), `${prefix}-Toggle`);
 		await expect(row.getByRole('checkbox', { name: new RegExp(`Active: ${prefix}-Toggle`, 'i') })).not.toBeChecked({
 			timeout: 15000
 		});

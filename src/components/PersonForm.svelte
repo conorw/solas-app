@@ -55,6 +55,10 @@
 		}
 	}
 
+	function onTextInput(field: 'FirstName' | 'LastName', event: Event) {
+		person[field] = (event.currentTarget as HTMLInputElement).value;
+	}
+
 	function cancel() {
 		history.back();
 	}
@@ -111,8 +115,20 @@
 	<section class="form-section">
 		<h2 class="form-section__title">Basics</h2>
 		<div class="form-grid">
-			<Textfield class="field" bind:value={person.FirstName} label="First Name" required />
-			<Textfield class="field" bind:value={person.LastName} label="Last Name" required />
+			<Textfield
+				class="field"
+				bind:value={person.FirstName}
+				label="First Name"
+				required
+				input$oninput={(e) => onTextInput('FirstName', e)}
+			/>
+			<Textfield
+				class="field"
+				bind:value={person.LastName}
+				label="Last Name"
+				required
+				input$oninput={(e) => onTextInput('LastName', e)}
+			/>
 			<div class="field field--dob">
 				<span class="field-label" id="dob-label">Date of Birth</span>
 				<DatePicker selected={dobSelected} onChange={onDobChange} />

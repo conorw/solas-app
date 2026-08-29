@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { loadEnv } from './helpers/env';
 import { cleanupFixtures, createPerson, runId } from './helpers/fixtures';
 import { getServiceClient } from './helpers/supabase';
+import { fillTextField } from './helpers/smui';
 
 loadEnv();
 
@@ -19,14 +20,14 @@ test.describe('people', () => {
 		personIds.push(a['Auto ID'], b['Auto ID']);
 
 		await page.goto('/people');
-		await expect(page.getByRole('cell', { name: a.FirstName, exact: true })).toBeVisible({
-			timeout: 15000
-		});
+		const search = page.getByRole('searchbox', { name: 'Search' });
+		await fillTextField(search, prefix);
+		await expect(page.locator('.result-count')).toHaveText(/2\s+people/i, { timeout: 15000 });
+		await expect(page.getByRole('cell', { name: a.FirstName, exact: true })).toBeVisible();
 		await expect(page.getByRole('cell', { name: b.FirstName, exact: true })).toBeVisible();
 
-		const search = page.getByLabel('Search');
-		await search.fill(`${prefix}-Alpha`);
-		await expect(page.getByText(/1 person/i)).toBeVisible({ timeout: 10000 });
+		await fillTextField(search, `${prefix}-Alpha`);
+		await expect(page.locator('.result-count')).toHaveText(/1\s+person/i, { timeout: 10000 });
 		await expect(page.getByRole('cell', { name: a.FirstName, exact: true })).toBeVisible();
 		await expect(page.getByRole('cell', { name: b.FirstName, exact: true })).toHaveCount(0);
 	});
@@ -60,6 +61,8 @@ test.describe('people', () => {
 			.not.toBeNull();
 
 		await page.goto('/people', { waitUntil: 'domcontentloaded' });
+		const search = page.getByRole('searchbox', { name: 'Search' });
+		await fillTextField(search, first);
 		await expect(page.getByRole('cell', { name: first, exact: true })).toBeVisible({
 			timeout: 15000
 		});
@@ -76,7 +79,8 @@ test.describe('people', () => {
 		const sb = getServiceClient();
 
 		await page.goto(`/people/${person['Auto ID']}`);
-		await page.getByLabel('Last Name').fill('Updated');
+		await expect(page.getByLabel('Last Name')).toBeVisible();
+		await fillTextField(page.getByLabel('Last Name'), 'Updated');
 		await page.getByRole('button', { name: /save/i }).click();
 
 		await expect
@@ -94,15 +98,14 @@ test.describe('people', () => {
 			.toBe('Updated');
 
 		await page.goto('/people', { waitUntil: 'domcontentloaded' });
+		await fillTextField(page.getByRole('searchbox', { name: 'Search' }), firstName);
 		const row = page.locator('tr', { hasText: firstName });
 		await expect(row).toBeVisible({ timeout: 15000 });
 
-		const deleteBtn = row.getByRole('button', { name: 'Delete person' });
+		const deleteBtn = row.getByTestId('delete-person');
 		await deleteBtn.scrollIntoViewIfNeeded();
-		await Promise.all([
-			page.waitForEvent('dialog').then((d) => d.accept()),
-			deleteBtn.click()
-		]);
+		page.once('dialog', (dialog) => dialog.accept());
+		await deleteBtn.click();
 
 		await expect(page.getByText(/deleted successfully/i)).toBeVisible({ timeout: 15000 });
 		await expect(row).toHaveCount(0, { timeout: 10000 });
