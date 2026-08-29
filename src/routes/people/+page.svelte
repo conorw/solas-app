@@ -45,6 +45,10 @@
 		query = '';
 	}
 
+	function onSearchInput(event: Event) {
+		query = (event.currentTarget as HTMLInputElement).value;
+	}
+
 	async function deletePerson(personRow: person) {
 		const display = getPersonDisplayName(personRow) || 'this person';
 		if (
@@ -97,6 +101,7 @@
 				bind:value={query}
 				label="Search"
 				input$aria-label="Search"
+				input$oninput={onSearchInput}
 			/>
 			{#if query}
 				<IconButton type="button" aria-label="Clear search" onclick={clearSearch}>

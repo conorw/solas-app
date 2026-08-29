@@ -31,8 +31,10 @@ test.describe('admin services', () => {
 
 		await page.goto('/admin/service');
 		await page.getByRole('button', { name: /add new service/i }).click();
-		await page.getByLabel('Name').fill(name);
-		await page.getByRole('button', { name: /^save$/i }).click();
+		const dialog = page.getByRole('dialog', { name: /add new service/i });
+		await expect(dialog).toBeVisible();
+		await dialog.getByLabel('Service name').fill(name);
+		await dialog.getByRole('button', { name: /^save$/i }).click();
 		await expect(page.locator('.service-name', { hasText: name })).toBeVisible({
 			timeout: 15000
 		});
@@ -54,9 +56,9 @@ test.describe('admin services', () => {
 		await page.getByLabel('Search').fill(`${prefix}-Toggle`);
 		const row = page.locator('tr', { hasText: `${prefix}-Toggle` });
 		await expect(row).toBeVisible({ timeout: 15000 });
-		const checkbox = row.locator('input[type="checkbox"]').first();
+		const checkbox = row.getByRole('checkbox', { name: new RegExp(`Active: ${prefix}-Toggle`, 'i') });
 		await expect(checkbox).toBeChecked();
-		await checkbox.click({ force: true });
+		await checkbox.click();
 
 		await expect
 			.poll(
@@ -74,7 +76,7 @@ test.describe('admin services', () => {
 
 		await page.reload();
 		await page.getByLabel('Search').fill(`${prefix}-Toggle`);
-		await expect(row.locator('input[type="checkbox"]').first()).not.toBeChecked({
+		await expect(row.getByRole('checkbox', { name: new RegExp(`Active: ${prefix}-Toggle`, 'i') })).not.toBeChecked({
 			timeout: 15000
 		});
 	});

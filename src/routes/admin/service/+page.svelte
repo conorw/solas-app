@@ -6,7 +6,6 @@
 	import Textfield from '@smui/textfield';
 	import type { PageData } from './$types';
 	import Checkbox from '@smui/checkbox';
-	import { tick } from 'svelte';
 	import Dialog, { Title, Content, Actions } from '@smui/dialog';
 	import Snackbar from '@smui/snackbar';
 	import IconButton from '@smui/icon-button';
@@ -56,6 +55,10 @@
 		query = '';
 	}
 
+	function onSearchInput(event: Event) {
+		query = (event.currentTarget as HTMLInputElement).value;
+	}
+
 	function openAddDialog() {
 		newItem = { Name: '', 'Is Current': true, Multi: false };
 		formError = '';
@@ -75,16 +78,14 @@
 	}
 
 	async function onCurrentChange(item: ServiceRow, e: Event) {
-		const fromEvent = (e?.target as HTMLInputElement | null)?.checked;
-		await tick();
-		const checked = fromEvent ?? !!item['Is Current'];
+		const checked = (e.currentTarget as HTMLInputElement).checked;
+		item['Is Current'] = checked;
 		await updateFlag(item, 'Is Current', checked);
 	}
 
 	async function onMultiChange(item: ServiceRow, e: Event) {
-		const fromEvent = (e?.target as HTMLInputElement | null)?.checked;
-		await tick();
-		const checked = fromEvent ?? !!item.Multi;
+		const checked = (e.currentTarget as HTMLInputElement).checked;
+		item.Multi = checked;
 		await updateFlag(item, 'Multi', checked);
 	}
 
@@ -119,7 +120,7 @@
 <div class="service-page">
 	<header class="service-toolbar">
 		<div class="service-toolbar__search">
-			<Textfield class="search-field" bind:value={query} label="Search" input$aria-label="Search" />
+			<Textfield class="search-field" bind:value={query} label="Search" input$aria-label="Search" input$oninput={onSearchInput} />
 			{#if query}
 				<IconButton type="button" aria-label="Clear search" onclick={clearSearch}>
 					<CommonIcon class="material-icons">clear</CommonIcon>
@@ -160,8 +161,8 @@
 							<Cell>
 								<FormField>
 									<Checkbox
+										checked={item['Is Current']}
 										onchange={(e) => onCurrentChange(item, e)}
-										bind:checked={item['Is Current']}
 										input$aria-label={`Active: ${item.Name}`}
 									/>
 									{#snippet label()}Active{/snippet}
@@ -170,8 +171,8 @@
 							<Cell>
 								<FormField>
 									<Checkbox
+										checked={item.Multi}
 										onchange={(e) => onMultiChange(item, e)}
-										bind:checked={item.Multi}
 										input$aria-label={`Multi event: ${item.Name}`}
 									/>
 									{#snippet label()}Multi{/snippet}
@@ -204,7 +205,12 @@
 	<Title id="simple-title">Add New Service</Title>
 	<Content id="simple-content">
 		<div class="dialog-body">
-			<Textfield class="dialog-name" bind:value={newItem.Name} label="Name" />
+			<Textfield
+				class="dialog-name"
+				bind:value={newItem.Name}
+				label="Name"
+				input$aria-label="Service name"
+			/>
 			{#if formError}
 				<p class="form-error" role="alert">{formError}</p>
 			{/if}

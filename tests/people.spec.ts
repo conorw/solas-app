@@ -26,6 +26,7 @@ test.describe('people', () => {
 
 		const search = page.getByLabel('Search');
 		await search.fill(`${prefix}-Alpha`);
+		await expect(page.getByText(/1 person/i)).toBeVisible({ timeout: 10000 });
 		await expect(page.getByRole('cell', { name: a.FirstName, exact: true })).toBeVisible();
 		await expect(page.getByRole('cell', { name: b.FirstName, exact: true })).toHaveCount(0);
 	});
