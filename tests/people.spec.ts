@@ -79,9 +79,11 @@ test.describe('people', () => {
 		const sb = getServiceClient();
 
 		await page.goto(`/people/${person['Auto ID']}`);
-		await expect(page.getByLabel('Last Name')).toBeVisible();
-		await fillTextField(page.getByLabel('Last Name'), 'Updated');
-		await page.getByRole('button', { name: /save/i }).click();
+		await expect(page.getByRole('heading', { name: /edit person/i })).toBeVisible({ timeout: 15000 });
+		const lastNameField = page.locator('.person-form').getByLabel('Last Name');
+		await fillTextField(lastNameField, 'Updated');
+		await expect(lastNameField).toHaveValue('Updated');
+		await page.getByRole('button', { name: /^save$/i }).click();
 
 		await expect
 			.poll(

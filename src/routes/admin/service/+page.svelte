@@ -3,7 +3,6 @@
 	import DataTable, { Head, Body, Row, Cell, Label as TableLabel } from '@smui/data-table';
 	import FormField from '@smui/form-field';
 	import Button, { Icon, Label } from '@smui/button';
-	import Textfield from '@smui/textfield';
 	import type { PageData } from './$types';
 	import Checkbox from '@smui/checkbox';
 	import Dialog, { Title, Content, Actions } from '@smui/dialog';
@@ -217,13 +216,16 @@
 	<Title id="simple-title">Add New Service</Title>
 	<Content id="simple-content">
 		<div class="dialog-body">
-			<Textfield
-				class="dialog-name"
-				bind:value={newItem.Name}
-				label="Name"
-				input$aria-label="Service name"
-				input$oninput={onNameInput}
-			/>
+			<label class="dialog-name-field">
+				<span class="dialog-name-field__label">Name</span>
+				<input
+					type="text"
+					class="dialog-name-input"
+					aria-label="Service name"
+					bind:value={newItem.Name}
+					oninput={onNameInput}
+				/>
+			</label>
 			{#if formError}
 				<p class="form-error" role="alert">{formError}</p>
 			{/if}
@@ -359,9 +361,28 @@
 		padding-top: 0.35rem;
 	}
 
-	:global(.dialog-name),
-	:global(.dialog-name .mdc-text-field) {
+	.dialog-name-field {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
 		width: 100%;
+	}
+
+	.dialog-name-field__label {
+		font-size: 0.85rem;
+		font-weight: 500;
+		opacity: 0.85;
+	}
+
+	.dialog-name-input {
+		width: 100%;
+		min-height: 3.25rem;
+		padding: 0.75rem 1rem;
+		border: 1px solid color-mix(in srgb, currentColor 24%, transparent);
+		border-radius: 4px;
+		font: inherit;
+		background: transparent;
+		color: inherit;
 	}
 
 	.form-error {

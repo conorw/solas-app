@@ -31,9 +31,12 @@ test.describe('admin services', () => {
 		serviceNames.push(name);
 
 		await page.goto('/admin/service');
-		await page.getByRole('button', { name: /add new service/i }).click();
-		await expect(page.locator('.mdc-dialog--open')).toBeVisible();
-		await fillTextField(page.getByLabel('Service name'), name);
+		const addBtn = page.getByRole('button', { name: /add new service/i });
+		await expect(addBtn).toBeVisible({ timeout: 15000 });
+		await addBtn.click();
+		const nameField = page.getByLabel('Service name');
+		await expect(nameField).toBeVisible({ timeout: 15000 });
+		await fillTextField(nameField, name);
 		await page.getByRole('button', { name: /^save$/i }).click();
 		await expect(page.locator('.service-name', { hasText: name })).toBeVisible({
 			timeout: 15000

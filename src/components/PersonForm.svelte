@@ -121,6 +121,7 @@
 				label="First Name"
 				required
 				input$oninput={(e) => onTextInput('FirstName', e)}
+				input$onchange={(e) => onTextInput('FirstName', e)}
 			/>
 			<Textfield
 				class="field"
@@ -128,6 +129,7 @@
 				label="Last Name"
 				required
 				input$oninput={(e) => onTextInput('LastName', e)}
+				input$onchange={(e) => onTextInput('LastName', e)}
 			/>
 			<div class="field field--dob">
 				<span class="field-label" id="dob-label">Date of Birth</span>
