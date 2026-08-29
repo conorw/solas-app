@@ -24,6 +24,7 @@
 	let scrollTop = $state(0);
 	let viewportHeight = $state(600);
 	let rowHeight = $state(56);
+	let lastSearchQuery = $state('');
 
 	const OVERSCAN = 10;
 
@@ -54,8 +55,10 @@
 	});
 
 	$effect(() => {
-		query;
+		const q = query;
 		untrack(() => {
+			if (q === lastSearchQuery) return;
+			lastSearchQuery = q;
 			scrollTop = 0;
 			if (panelEl) panelEl.scrollTop = 0;
 		});
@@ -64,12 +67,20 @@
 	$effect(() => {
 		const el = panelEl;
 		if (!el) return;
+		const onScroll = () => {
+			scrollTop = el.scrollTop;
+		};
 		const ro = new ResizeObserver(() => {
 			viewportHeight = el.clientHeight;
 		});
+		el.addEventListener('scroll', onScroll, { passive: true });
 		ro.observe(el);
 		viewportHeight = el.clientHeight;
-		return () => ro.disconnect();
+		scrollTop = el.scrollTop;
+		return () => {
+			el.removeEventListener('scroll', onScroll);
+			ro.disconnect();
+		};
 	});
 
 	$effect(() => {
@@ -86,10 +97,6 @@
 
 	function clearSearch() {
 		query = '';
-	}
-
-	function onPanelScroll(event: Event) {
-		scrollTop = (event.currentTarget as HTMLDivElement).scrollTop;
 	}
 
 	async function deletePerson(personRow: person) {
@@ -154,7 +161,8 @@
 		</div>
 		<div class="people-toolbar__actions">
 			<span class="result-count" aria-live="polite">
-				{people.length} {people.length === 1 ? 'person' : 'people'}
+				{people.length}
+				{people.length === 1 ? 'person' : 'people'}
 			</span>
 			<Button href="/people/new" variant="unelevated" class="add-btn">
 				<Icon class="material-icons">person_add</Icon>
@@ -164,7 +172,7 @@
 	</header>
 
 	{#if people.length}
-		<div class="table-panel" bind:this={panelEl} onscroll={onPanelScroll}>
+		<div class="table-panel" bind:this={panelEl}>
 			<DataTable
 				stickyHeader
 				table$aria-label="User list"
@@ -258,13 +266,25 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
-		padding: 1rem 1.25rem 2rem;
+		padding: 1rem 1.25rem;
 		max-width: 72rem;
 		margin: 0 auto;
-		min-height: calc(100dvh - 5rem);
+		width: 100%;
+		box-sizing: border-box;
+		height: calc(100dvh - 3.5rem);
+		max-height: calc(100dvh - 3.5rem);
+		overflow: hidden;
+	}
+
+	:global(main.app-main:has(.people-page)) {
+		overflow: hidden;
 	}
 
 	.people-toolbar {
+		position: sticky;
+		top: 0;
+		z-index: 3;
+		flex-shrink: 0;
 		display: flex;
 		flex-wrap: wrap;
 		align-items: flex-end;
@@ -273,7 +293,7 @@
 		padding: 0.85rem 1rem;
 		border: 1px solid color-mix(in srgb, currentColor 14%, transparent);
 		border-radius: 8px;
-		background: var(--mdc-theme-surface, transparent);
+		background: var(--mdc-theme-surface, #fff);
 	}
 
 	.people-toolbar__search {
@@ -314,10 +334,10 @@
 	}
 
 	.table-panel {
-		flex: 1;
+		flex: 1 1 auto;
 		min-height: 0;
 		overflow: auto;
-		max-height: calc(100dvh - 11rem);
+		overscroll-behavior: contain;
 		border: 1px solid color-mix(in srgb, currentColor 14%, transparent);
 		border-radius: 8px;
 		background: var(--mdc-theme-surface, transparent);
@@ -380,6 +400,8 @@
 	}
 
 	.empty-state {
+		flex: 1 1 auto;
+		min-height: 0;
 		display: flex;
 		flex-direction: column;
 		align-items: center;

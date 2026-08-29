@@ -15,6 +15,9 @@ import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const SEED_PREFIX = 'Seed Stats';
+/** Extra people so /people virtualization is visible locally. No attendance. */
+const DIRECTORY_COUNT = 300;
+const DIRECTORY_EMAIL = 'seed-list-';
 
 function loadEnv() {
 	const path = resolve(process.cwd(), '.env');
@@ -135,6 +138,113 @@ async function clearStatsSeed() {
 		.ilike('ServiceName', `${SEED_PREFIX}%`);
 
 	console.log('cleared previous', SEED_PREFIX, 'rows');
+}
+
+/** Remove prior bulk directory people so re-runs stay idempotent. */
+async function clearDirectorySeed() {
+	const { data: seedPeople, error: pe } = await sb
+		.from('people')
+		.select('"Auto ID"')
+		.ilike('Email', `${DIRECTORY_EMAIL}%`);
+	if (pe) throw pe;
+	const personIds = (seedPeople || []).map((p) => p['Auto ID']);
+	if (personIds.length) {
+		await sb.from('attendance').delete().in('Person Id', personIds);
+		await sb.from('people').delete().in('Auto ID', personIds);
+	}
+	console.log('cleared previous directory seed', personIds.length);
+}
+
+function directoryPersonDefs() {
+	const firstNames = [
+		'Aoife',
+		'Niamh',
+		'Siobhan',
+		'Maeve',
+		'Orla',
+		'Ciara',
+		'Aisling',
+		'Roisin',
+		'Sinead',
+		'Clodagh',
+		'Fiona',
+		'Grainne',
+		'Deirdre',
+		'Eimear',
+		'Sorcha',
+		'Padraig',
+		'Cian',
+		'Oisin',
+		'Cillian',
+		'Fionn',
+		'Eoin',
+		'Sean',
+		'Conor',
+		'Diarmuid',
+		'Cathal',
+		'Tadhg',
+		'Ronan',
+		'Colm',
+		'Niall',
+		'Darragh'
+	];
+	const lastNames = [
+		'Murphy',
+		'Kelly',
+		'Walsh',
+		'Ryan',
+		'Byrne',
+		'OBrien',
+		'McCarthy',
+		'Gallagher',
+		'Doherty',
+		'Kennedy',
+		'Lynch',
+		'Murray',
+		'Quinn',
+		'Moore',
+		'Farrell'
+	];
+	const towns = [
+		'Galway',
+		'Athenry',
+		'Oranmore',
+		'Salthill',
+		'Tuam',
+		'Ballinasloe',
+		'Clifden',
+		'Loughrea'
+	];
+
+	return Array.from({ length: DIRECTORY_COUNT }, (_, i) => {
+		const n = String(i + 1).padStart(3, '0');
+		const year = 1948 + (i % 55);
+		const month = String((i % 12) + 1).padStart(2, '0');
+		const day = String((i % 27) + 1).padStart(2, '0');
+		return {
+			FirstName: firstNames[i % firstNames.length],
+			LastName: lastNames[Math.floor(i / firstNames.length) % lastNames.length],
+			DateOfBirth: `${year}-${month}-${day}`,
+			Email: `${DIRECTORY_EMAIL}${n}@example.com`,
+			Phone: `0862${n.padStart(6, '0')}`,
+			Gender: i % 3 === 0 ? 'Female' : i % 3 === 1 ? 'Male' : 'Other',
+			Town: towns[i % towns.length]
+		};
+	});
+}
+
+async function seedDirectoryPeople() {
+	const defs = directoryPersonDefs();
+	const chunkSize = 100;
+	let inserted = 0;
+	for (let i = 0; i < defs.length; i += chunkSize) {
+		const chunk = defs.slice(i, i + chunkSize);
+		const { data, error } = await sb.from('people').insert(chunk).select('"Auto ID"');
+		if (error) throw error;
+		inserted += data.length;
+	}
+	console.log('directory people', inserted);
+	return inserted;
 }
 
 async function seedStatsData() {
@@ -284,24 +394,18 @@ async function seedStatsData() {
 	add(brian, legacy, `${year}-01-20`);
 
 	// Multi / bulk attendance against anonymous person.
-	add(
-		{ id: anonId, name: 'Anonymous Attendee' },
-		bulk,
-		`${year}-02-14`,
-		{ Multi: true, TotalAttendees: 8 }
-	);
-	add(
-		{ id: anonId, name: 'Anonymous Attendee' },
-		bulk,
-		`${year}-05-21`,
-		{ Multi: true, TotalAttendees: 12 }
-	);
-	add(
-		{ id: anonId, name: 'Anonymous Attendee' },
-		bulk,
-		`${year}-08-04`,
-		{ Multi: true, TotalAttendees: 5 }
-	);
+	add({ id: anonId, name: 'Anonymous Attendee' }, bulk, `${year}-02-14`, {
+		Multi: true,
+		TotalAttendees: 8
+	});
+	add({ id: anonId, name: 'Anonymous Attendee' }, bulk, `${year}-05-21`, {
+		Multi: true,
+		TotalAttendees: 12
+	});
+	add({ id: anonId, name: 'Anonymous Attendee' }, bulk, `${year}-08-04`, {
+		Multi: true,
+		TotalAttendees: 5
+	});
 
 	const { data: attRows, error: attErr } = await sb
 		.from('attendance')
@@ -317,16 +421,17 @@ await ensureUser(adminEmail, adminPass, true);
 await ensureUser(userEmail, userPass, false);
 await ensureAnonymousPerson();
 await clearStatsSeed();
+await clearDirectorySeed();
 const result = await seedStatsData();
+const directoryCount = await seedDirectoryPeople();
 
 console.log('seed ok');
 console.log(
 	`stats data for ${result.year}: ${result.people.length} people, ${result.services.length} services, ${result.attendanceCount} attendance`
 );
+console.log(`directory people for /people list: ${directoryCount}`);
 console.log('Open /admin/stats (default range is start–end of current year).');
-console.log(
-	`Person drill-down example: /admin/stats/people/${result.people[0]['Auto ID']}`
-);
+console.log(`Person drill-down example: /admin/stats/people/${result.people[0]['Auto ID']}`);
 console.log(
 	`Service drill-down example: /admin/stats/services/${encodeURIComponent(result.services[0].Name)}`
 );

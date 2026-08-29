@@ -201,6 +201,8 @@
 <style>
 	:global(.solas-app-bar) {
 		z-index: 50;
+		top: 0;
+		left: 0;
 	}
 
 	:global(.solas-app-bar .mdc-top-app-bar__row) {
