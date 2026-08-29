@@ -4,8 +4,8 @@
  * attendance so /admin/stats screens have data for the current year.
  *
  * Usage: npm run seed:dev
- * Requires .env: PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,
- * TEST_ADMIN_EMAIL/PASSWORD, TEST_USER_EMAIL/PASSWORD
+ * Requires PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,
+ * TEST_ADMIN_EMAIL/PASSWORD, TEST_USER_EMAIL/PASSWORD (from .env locally or env in CI).
  *
  * Re-running is safe: previous rows tagged with FirstName/Name prefix
  * "Seed Stats" are replaced.
@@ -18,7 +18,7 @@ const SEED_PREFIX = 'Seed Stats';
 
 function loadEnv() {
 	const path = resolve(process.cwd(), '.env');
-	if (!existsSync(path)) throw new Error('.env not found');
+	if (!existsSync(path)) return;
 	for (const line of readFileSync(path, 'utf8').split(/\r?\n/)) {
 		const t = line.trim();
 		if (!t || t.startsWith('#') || !t.includes('=')) continue;
