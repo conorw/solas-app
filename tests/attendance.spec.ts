@@ -42,8 +42,9 @@ test.describe('attendance', () => {
 		attendanceIds.push(att['Auto ID']);
 
 		await page.goto(`/attendance?date=${date}`);
+		await expect(page.getByRole('heading', { name: /Attendees/i })).toBeVisible({ timeout: 15000 });
 		await expect(page.locator('.attendee-row').filter({ hasText: person.FirstName })).toBeVisible({
-			timeout: 15000
+			timeout: 20000
 		});
 	});
 

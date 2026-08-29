@@ -10,7 +10,6 @@
 	import { DateTime } from 'luxon';
 	import DatePicker from '../../components/DatePicker.svelte';
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
 	import Dialog, { Title, Content, Actions } from '@smui/dialog';
 	import Snackbar from '@smui/snackbar';
 	import { ANONYMOUS_PERSON_ID } from '#lib/constants.js';
@@ -29,11 +28,11 @@
 
 	let selectedPerson: any | undefined = $state(undefined);
 	let selectedService: any | undefined = $state(undefined);
-	let selectedDate: Date = $state(
-		page.url.searchParams.get('date')
-			? new Date(page.url.searchParams.get('date') as string)
-			: new Date()
-	);
+	let selectedDateIso = $state('');
+
+	$effect.pre(() => {
+		selectedDateIso = data.date;
+	});
 	let attendance: any[] = $state([]);
 	let open = $state(false);
 	let participantCount = $state(10);
@@ -41,6 +40,7 @@
 	let selectedMultiService: any = $state(null);
 	const services = $derived(data?.service?.filter((s) => !s['Multi']) ?? []);
 	const multiServices = $derived(data?.service?.filter((s) => s['Multi']) ?? []);
+	const selectedDate = $derived(DateTime.fromISO(selectedDateIso).toJSDate());
 	let snackbar: Snackbar;
 	let snackMessage = $state('');
 	let lastAddedId: number | null = $state(null);
@@ -60,15 +60,13 @@
 
 	function navigateToDate(date: Date) {
 		const iso = DateTime.fromJSDate(date).toFormat('yyyy-MM-dd');
-		const currentIso = DateTime.fromJSDate(selectedDate).toFormat('yyyy-MM-dd');
-		selectedDate = date;
-		if (iso === currentIso) {
+		if (iso === selectedDateIso) {
 			return;
 		}
+		selectedDateIso = iso;
 		const url = new URL(page.url.href);
 		url.searchParams.set('date', iso);
 		goto(`${url.pathname}?${url.searchParams}`);
-		updateAttendance(iso);
 	}
 
 	function shiftDay(delta: number) {
@@ -121,8 +119,9 @@
 		});
 	}
 
-	onMount(() => {
-		updateAttendance(DateTime.fromJSDate(selectedDate).toFormat('yyyy-MM-dd'));
+	$effect(() => {
+		if (!selectedDateIso) return;
+		void updateAttendance(selectedDateIso);
 	});
 
 	const deleteAttendance = async (attend: any) => {
@@ -271,7 +270,7 @@
 				</IconButton>
 				<DatePicker
 					onChange={(e) => navigateToDate(e)}
-					bind:selected={selectedDate}
+					selected={selectedDate}
 				/>
 				<IconButton aria-label="Next day" onclick={() => shiftDay(1)}>
 					<Icon class="material-icons">chevron_right</Icon>

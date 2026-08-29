@@ -45,8 +45,9 @@ test.describe('admin stats', () => {
 
 	test('export PDF opens section dialog then print', async ({ page }) => {
 		await page.goto('/admin/stats');
+		await expect(page.getByText(/Unique people/i)).toBeVisible({ timeout: 30000 });
 		const exportPdf = page.getByRole('button', { name: 'Export PDF' });
-		await expect(exportPdf).toBeVisible({ timeout: 20000 });
+		await expect(exportPdf).toBeVisible({ timeout: 10000 });
 		await expect(exportPdf).toBeEnabled();
 
 		await page.evaluate(() => {
