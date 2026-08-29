@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { loadEnv } from './helpers/env';
 import { cleanupFixtures, createService, runId } from './helpers/fixtures';
 import { getServiceClient } from './helpers/supabase';
-import { fillTextField } from './helpers/smui';
+import { fillTextField, setCheckbox } from './helpers/smui';
 
 loadEnv();
 
@@ -20,6 +20,9 @@ test.describe('admin services', () => {
 		serviceIds.push(svc['Auto ID']);
 
 		await page.goto('/admin/service');
+		await expect(page.getByTestId('service-page')).toHaveAttribute('data-ready', 'true', {
+			timeout: 15000
+		});
 		await expect(page.getByText(svc.Name!)).toBeVisible({ timeout: 15000 });
 
 		await fillTextField(page.getByRole('searchbox', { name: 'Search' }), `${prefix}-Listed`);
@@ -31,14 +34,21 @@ test.describe('admin services', () => {
 		serviceNames.push(name);
 
 		await page.goto('/admin/service');
-		const addBtn = page.getByRole('button', { name: /add new service/i });
+		await expect(page.getByTestId('service-page')).toHaveAttribute('data-ready', 'true', {
+			timeout: 15000
+		});
+		const addBtn = page.getByTestId('add-service');
 		await expect(addBtn).toBeVisible({ timeout: 15000 });
-		await addBtn.click();
-		const dialog = page.getByRole('dialog', { name: /add new service/i });
-		await expect(dialog).toBeVisible({ timeout: 15000 });
+		await addBtn.scrollIntoViewIfNeeded();
+		const dialog = page.getByTestId('add-service-dialog');
+		await expect(async () => {
+			if (await dialog.isVisible()) return;
+			await addBtn.click({ force: true });
+			await expect(dialog).toBeVisible();
+		}).toPass({ timeout: 15000 });
 		const nameField = dialog.getByLabel('Service name');
 		await fillTextField(nameField, name);
-		await dialog.getByRole('button', { name: /^save$/i }).click();
+		await dialog.getByTestId('save-service').click();
 		await expect(page.locator('.service-name', { hasText: name })).toBeVisible({
 			timeout: 15000
 		});
@@ -57,12 +67,15 @@ test.describe('admin services', () => {
 		const sb = getServiceClient();
 
 		await page.goto('/admin/service');
+		await expect(page.getByTestId('service-page')).toHaveAttribute('data-ready', 'true', {
+			timeout: 15000
+		});
 		await fillTextField(page.getByRole('searchbox', { name: 'Search' }), `${prefix}-Toggle`);
 		const row = page.locator('tr', { hasText: `${prefix}-Toggle` });
 		await expect(row).toBeVisible({ timeout: 15000 });
-		const checkbox = row.getByRole('checkbox', { name: new RegExp(`Active: ${prefix}-Toggle`, 'i') });
+		const checkbox = page.getByTestId(`service-active-${svc['Auto ID']}`);
 		await expect(checkbox).toBeChecked();
-		await checkbox.uncheck();
+		await setCheckbox(checkbox, false);
 
 		await expect
 			.poll(
@@ -79,6 +92,9 @@ test.describe('admin services', () => {
 			.toBe(false);
 
 		await page.reload();
+		await expect(page.getByTestId('service-page')).toHaveAttribute('data-ready', 'true', {
+			timeout: 15000
+		});
 		await fillTextField(page.getByRole('searchbox', { name: 'Search' }), `${prefix}-Toggle`);
 		await expect(row.getByRole('checkbox', { name: new RegExp(`Active: ${prefix}-Toggle`, 'i') })).not.toBeChecked({
 			timeout: 15000

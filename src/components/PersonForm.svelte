@@ -10,6 +10,7 @@
 	import DatePicker from './DatePicker.svelte';
 	import Checkbox from '@smui/checkbox';
 	import FormField from '@smui/form-field';
+	import { onMount } from 'svelte';
 
 	interface Props {
 		person: PersonRow;
@@ -27,6 +28,13 @@
 	let saving = $state(false);
 	let formError = $state('');
 	let equalityOptOut = $state(Boolean(person['Equality Opt Out']));
+	let firstName = $state(person.FirstName ?? '');
+	let lastName = $state(person.LastName ?? '');
+	let hydrated = $state(false);
+
+	onMount(() => {
+		hydrated = true;
+	});
 
 	const isNew = $derived(!person['Auto ID'] || person['Auto ID'] <= 0);
 	const heading = $derived(
@@ -61,8 +69,8 @@
 
 	async function save() {
 		formError = '';
-		const first = (person.FirstName ?? '').trim();
-		const last = (person.LastName ?? '').trim();
+		const first = firstName.trim();
+		const last = lastName.trim();
 		if (!first || !last) {
 			formError = 'First name and last name are required.';
 			showSnack(formError, true);
@@ -72,16 +80,14 @@
 		person.LastName = last;
 		person['Equality Opt Out'] = equalityOptOut;
 
-		const payload =
-			person['Auto ID'] && person['Auto ID'] > 0
-				? person
-				: (() => {
-						const { 'Auto ID': _id, ...rest } = person;
-						return rest;
-					})();
+		const id = person['Auto ID'];
+		const { 'Auto ID': _id, 'Full Name': _fullName, ...rest } = person;
 
 		saving = true;
-		const ret = await supabase.from('people').upsert(payload);
+		const ret =
+			id && id > 0
+				? await supabase.from('people').update(rest).eq('Auto ID', id)
+				: await supabase.from('people').insert(rest);
 		saving = false;
 
 		if (ret.error) {
@@ -94,7 +100,7 @@
 	}
 </script>
 
-<div class="person-form">
+<div class="person-form" data-testid="person-form" data-ready={hydrated ? 'true' : undefined}>
 	<header class="person-form__header">
 		<div class="person-form__heading">
 			<Button variant="outlined" class="back-btn" onclick={cancel} disabled={saving}>
@@ -118,7 +124,7 @@
 					class="native-input"
 					aria-label="First Name"
 					required
-					bind:value={person.FirstName}
+					bind:value={firstName}
 				/>
 			</label>
 			<label class="field native-field">
@@ -128,7 +134,7 @@
 					class="native-input"
 					aria-label="Last Name"
 					required
-					bind:value={person.LastName}
+					bind:value={lastName}
 				/>
 			</label>
 			<div class="field field--dob">
@@ -313,18 +319,18 @@
 	</section>
 
 	<footer class="person-form__footer">
-		<Button variant="outlined" class="footer-btn" onclick={cancel} disabled={saving}>
-			<Label>Cancel</Label>
-		</Button>
-		<Button
-			variant="unelevated"
-			class="footer-btn footer-btn--primary"
+		<button type="button" class="native-footer-btn" onclick={cancel} disabled={saving}>
+			Cancel
+		</button>
+		<button
+			type="button"
+			class="native-footer-btn native-footer-btn--primary"
+			data-testid="save-person"
 			onclick={save}
 			disabled={saving}
 		>
-			<Icon class="material-icons">save</Icon>
-			<Label>{saving ? 'Saving…' : 'Save'}</Label>
-		</Button>
+			{saving ? 'Saving…' : 'Save'}
+		</button>
 	</footer>
 </div>
 
@@ -476,13 +482,29 @@
 		backdrop-filter: blur(8px);
 	}
 
-	:global(.footer-btn) {
+	.native-footer-btn {
 		min-height: 3rem;
 		min-width: 7rem;
+		padding: 0 1.1rem;
+		border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
+		border-radius: 4px;
+		font: inherit;
+		font-weight: 500;
+		cursor: pointer;
+		background: transparent;
+		color: inherit;
 	}
 
-	:global(.footer-btn--primary) {
+	.native-footer-btn:disabled {
+		opacity: 0.55;
+		cursor: not-allowed;
+	}
+
+	.native-footer-btn--primary {
 		min-width: 10rem;
+		border-color: transparent;
+		background: var(--mdc-theme-primary, #40b3ff);
+		color: var(--mdc-theme-on-primary, #fff);
 	}
 
 	@media (prefers-color-scheme: dark) {

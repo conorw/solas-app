@@ -6,6 +6,7 @@
 	import Snackbar from '@smui/snackbar';
 	import IconButton from '@smui/icon-button';
 	import { Icon as CommonIcon } from '@smui/common';
+	import { onMount } from 'svelte';
 
 	interface Props {
 		data: PageData;
@@ -25,6 +26,11 @@
 		Multi: false
 	});
 	let formError = $state('');
+	let hydrated = $state(false);
+
+	onMount(() => {
+		hydrated = true;
+	});
 
 	$effect(() => {
 		data.service;
@@ -103,7 +109,7 @@
 			'Is Current': newItem['Is Current'],
 			Multi: newItem.Multi
 		};
-		const ret = await data.supabase.from('service').upsert([payload]).select('*');
+		const ret = await data.supabase.from('service').insert([payload]).select('*');
 		saving = false;
 		if (ret.error) {
 			formError = ret.error.message;
@@ -118,7 +124,7 @@
 	}
 </script>
 
-<div class="service-page">
+<div class="service-page" data-testid="service-page" data-ready={hydrated ? 'true' : undefined}>
 	<header class="service-toolbar">
 		<div class="service-toolbar__search">
 			<input
@@ -139,7 +145,12 @@
 			<span class="result-count" aria-live="polite">
 				{services.length} {services.length === 1 ? 'service' : 'services'}
 			</span>
-			<button type="button" class="add-btn native-add-btn" onclick={openAddDialog}>
+			<button
+				type="button"
+				class="add-btn native-add-btn"
+				data-testid="add-service"
+				onclick={openAddDialog}
+			>
 				<span class="material-icons" aria-hidden="true">add</span>
 				Add New Service
 			</button>
@@ -172,6 +183,8 @@
 										type="checkbox"
 										checked={item['Is Current']}
 										aria-label={`Active: ${item.Name}`}
+										data-testid={`service-active-${item['Auto ID']}`}
+										onclick={(e) => e.stopPropagation()}
 										onchange={(e) => onCurrentChange(item, e)}
 									/>
 									<span>Active</span>
@@ -183,6 +196,7 @@
 										type="checkbox"
 										checked={item.Multi}
 										aria-label={`Multi event: ${item.Name}`}
+										onclick={(e) => e.stopPropagation()}
 										onchange={(e) => onMultiChange(item, e)}
 									/>
 									<span>Multi</span>
@@ -202,7 +216,12 @@
 				</Button>
 			{:else}
 				<p>No services yet.</p>
-				<button type="button" class="native-add-btn" onclick={openAddDialog}>
+				<button
+					type="button"
+					class="native-add-btn"
+					data-testid="add-service"
+					onclick={openAddDialog}
+				>
 					<span class="material-icons" aria-hidden="true">add</span>
 					Add New Service
 				</button>
@@ -218,6 +237,8 @@
 			role="dialog"
 			aria-modal="true"
 			aria-labelledby="simple-title"
+			aria-label="Add New Service"
+			data-testid="add-service-dialog"
 		>
 			<h2 id="simple-title">Add New Service</h2>
 			<div class="dialog-body">
@@ -244,12 +265,18 @@
 				</label>
 			</div>
 			<div class="modal-actions">
-				<Button type="button" onclick={() => (open = false)} disabled={saving}>
-					<Label>Cancel</Label>
-				</Button>
-				<Button type="button" variant="raised" onclick={saveNewService} disabled={saving}>
-					<Label>Save</Label>
-				</Button>
+				<button type="button" class="native-footer-btn" onclick={() => (open = false)} disabled={saving}>
+					Cancel
+				</button>
+				<button
+					type="button"
+					class="native-footer-btn native-footer-btn--primary"
+					data-testid="save-service"
+					onclick={saveNewService}
+					disabled={saving}
+				>
+					{saving ? 'Saving…' : 'Save'}
+				</button>
 			</div>
 		</div>
 	</div>
@@ -344,7 +371,7 @@
 	.modal-backdrop {
 		position: fixed;
 		inset: 0;
-		z-index: 20;
+		z-index: 80;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -371,6 +398,30 @@
 		justify-content: flex-end;
 		gap: 0.5rem;
 		margin-top: 1rem;
+	}
+
+	.native-footer-btn {
+		min-height: 2.75rem;
+		min-width: 6.5rem;
+		padding: 0 1rem;
+		border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
+		border-radius: 4px;
+		font: inherit;
+		font-weight: 500;
+		cursor: pointer;
+		background: transparent;
+		color: inherit;
+	}
+
+	.native-footer-btn:disabled {
+		opacity: 0.55;
+		cursor: not-allowed;
+	}
+
+	.native-footer-btn--primary {
+		border-color: transparent;
+		background: var(--mdc-theme-primary, #40b3ff);
+		color: var(--mdc-theme-on-primary, #fff);
 	}
 
 	.hint {

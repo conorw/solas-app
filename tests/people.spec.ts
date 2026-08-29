@@ -101,9 +101,12 @@ test.describe('people', () => {
 		const sb = getServiceClient();
 
 		await page.goto('/people/new');
+		await expect(page.getByTestId('person-form')).toHaveAttribute('data-ready', 'true', {
+			timeout: 15000
+		});
 		await fillTextField(page.getByLabel('First Name'), first);
 		await fillTextField(page.getByLabel('Last Name'), last);
-		await page.getByRole('button', { name: /save/i }).click();
+		await page.getByTestId('save-person').click();
 
 		await expect
 			.poll(
@@ -142,11 +145,14 @@ test.describe('people', () => {
 		const sb = getServiceClient();
 
 		await page.goto(`/people/${person['Auto ID']}`);
+		await expect(page.getByTestId('person-form')).toHaveAttribute('data-ready', 'true', {
+			timeout: 15000
+		});
 		await expect(page.getByRole('heading', { name: /edit person/i })).toBeVisible({ timeout: 15000 });
 		const lastNameField = page.locator('.person-form').getByLabel('Last Name');
 		await fillTextField(lastNameField, 'Updated');
 		await expect(lastNameField).toHaveValue('Updated');
-		await page.getByRole('button', { name: /^save$/i }).click();
+		await page.getByTestId('save-person').click();
 
 		await expect
 			.poll(
