@@ -10,3 +10,4 @@ tests/.auth/
 /test-results/
 /playwright-report/
 /blob-report/
+/backups/

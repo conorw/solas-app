@@ -1,0 +1,44 @@
+name: Backup production database
+
+on:
+  schedule:
+    - cron: '0 4 1 * *'
+  workflow_dispatch:
+
+concurrency:
+  group: backup-prod
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Require production secrets
+        run: |
+          if [ -z "${{ secrets.PROD_SUPABASE_URL }}" ] || [ -z "${{ secrets.PROD_SUPABASE_SERVICE_ROLE_KEY }}" ] || [ -z "${{ secrets.PROD_SUPABASE_DB_URL }}" ]; then
+            echo "::error::Configure GitHub secrets: PROD_SUPABASE_URL, PROD_SUPABASE_SERVICE_ROLE_KEY, PROD_SUPABASE_DB_URL"
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Dump and upload
+        env:
+          PROD_SUPABASE_URL: ${{ secrets.PROD_SUPABASE_URL }}
+          PROD_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.PROD_SUPABASE_SERVICE_ROLE_KEY }}
+          PROD_SUPABASE_DB_URL: ${{ secrets.PROD_SUPABASE_DB_URL }}
+        run: npm run backup:prod

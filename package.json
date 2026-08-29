@@ -17,6 +17,7 @@
         "test:all": "npm run test:unit && npm run test:e2e",
         "test:precommit": "npm run test:all",
         "seed:dev": "node scripts/seed-solas-dev.mjs",
+        "backup:prod": "node scripts/backup-prod.mjs",
         "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
         "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
         "lint": "prettier --check . && eslint .",
