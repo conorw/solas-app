@@ -55,10 +55,6 @@
 		}
 	}
 
-	function onTextInput(field: 'FirstName' | 'LastName', event: Event) {
-		person[field] = (event.currentTarget as HTMLInputElement).value;
-	}
-
 	function cancel() {
 		history.back();
 	}
@@ -115,22 +111,26 @@
 	<section class="form-section">
 		<h2 class="form-section__title">Basics</h2>
 		<div class="form-grid">
-			<Textfield
-				class="field"
-				bind:value={person.FirstName}
-				label="First Name"
-				required
-				input$oninput={(e) => onTextInput('FirstName', e)}
-				input$onchange={(e) => onTextInput('FirstName', e)}
-			/>
-			<Textfield
-				class="field"
-				bind:value={person.LastName}
-				label="Last Name"
-				required
-				input$oninput={(e) => onTextInput('LastName', e)}
-				input$onchange={(e) => onTextInput('LastName', e)}
-			/>
+			<label class="field native-field">
+				<span class="field-label">First Name</span>
+				<input
+					type="text"
+					class="native-input"
+					aria-label="First Name"
+					required
+					bind:value={person.FirstName}
+				/>
+			</label>
+			<label class="field native-field">
+				<span class="field-label">Last Name</span>
+				<input
+					type="text"
+					class="native-input"
+					aria-label="Last Name"
+					required
+					bind:value={person.LastName}
+				/>
+			</label>
 			<div class="field field--dob">
 				<span class="field-label" id="dob-label">Date of Birth</span>
 				<DatePicker selected={dobSelected} onChange={onDobChange} />
@@ -431,6 +431,23 @@
 		text-transform: uppercase;
 		opacity: 0.7;
 		font-weight: 500;
+	}
+
+	.native-field {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+	}
+
+	.native-input {
+		width: 100%;
+		min-height: 3.25rem;
+		padding: 0.75rem 1rem;
+		border: 1px solid color-mix(in srgb, currentColor 24%, transparent);
+		border-radius: 4px;
+		font: inherit;
+		background: transparent;
+		color: inherit;
 	}
 
 	.flag-grid {

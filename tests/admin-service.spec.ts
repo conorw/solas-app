@@ -34,10 +34,11 @@ test.describe('admin services', () => {
 		const addBtn = page.getByRole('button', { name: /add new service/i });
 		await expect(addBtn).toBeVisible({ timeout: 15000 });
 		await addBtn.click();
-		const nameField = page.getByLabel('Service name');
-		await expect(nameField).toBeVisible({ timeout: 15000 });
+		const dialog = page.getByRole('dialog', { name: /add new service/i });
+		await expect(dialog).toBeVisible({ timeout: 15000 });
+		const nameField = dialog.getByLabel('Service name');
 		await fillTextField(nameField, name);
-		await page.getByRole('button', { name: /^save$/i }).click();
+		await dialog.getByRole('button', { name: /^save$/i }).click();
 		await expect(page.locator('.service-name', { hasText: name })).toBeVisible({
 			timeout: 15000
 		});

@@ -6,7 +6,10 @@
 	import type { PageData } from './$types';
 	import IconButton from '@smui/icon-button';
 	import { Icon as CommonIcon } from '@smui/common';
-	import { untrack } from 'svelte';
+	import { tick, untrack } from 'svelte';
+	import { browser } from '$app/environment';
+	import { afterNavigate, goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import { getPersonDisplayName } from '#lib/person.js';
 	import { virtualWindow } from '#lib/virtualWindow.js';
 
@@ -14,8 +17,13 @@
 		data: PageData;
 	}
 
+	function queryFromUrl(): string {
+		if (browser) return new URL(window.location.href).searchParams.get('q') ?? '';
+		return page.url.searchParams.get('q') ?? '';
+	}
+
 	let { data }: Props = $props();
-	let query = $state('');
+	let query = $state(queryFromUrl());
 	let snackbar: Snackbar;
 	let snackMessage = $state('');
 	/** Local override after deletes; null means use server `data.people`. */
@@ -62,6 +70,35 @@
 			scrollTop = 0;
 			if (panelEl) panelEl.scrollTop = 0;
 		});
+	});
+
+	function peopleSearchPath(q: string): string {
+		const url = new URL(window.location.href);
+		if (q) url.searchParams.set('q', q);
+		else url.searchParams.delete('q');
+		const search = url.searchParams.toString();
+		return search ? `${url.pathname}?${search}` : url.pathname;
+	}
+
+	function writeQueryToUrl(q: string) {
+		if (!browser) return;
+		const current = new URL(window.location.href).searchParams.get('q') ?? '';
+		if (current === q) return;
+		void goto(peopleSearchPath(q), { replace: true, reset: false });
+	}
+
+	$effect(() => {
+		const q = query;
+		untrack(() => {
+			writeQueryToUrl(q);
+		});
+	});
+
+	afterNavigate(async (nav) => {
+		if (nav.type !== 'popstate') return;
+		query = queryFromUrl();
+		await tick();
+		query = queryFromUrl();
 	});
 
 	$effect(() => {
@@ -151,12 +188,13 @@
 				class="search-input"
 				aria-label="Search"
 				placeholder="Search"
+				autocomplete="off"
 				bind:value={query}
 			/>
 			{#if query}
-				<IconButton type="button" aria-label="Clear" onclick={clearSearch}>
-					<CommonIcon class="material-icons">clear</CommonIcon>
-				</IconButton>
+				<button type="button" class="clear-btn" aria-label="Clear" onclick={clearSearch}>
+					<span class="material-icons" aria-hidden="true">clear</span>
+				</button>
 			{/if}
 		</div>
 		<div class="people-toolbar__actions">
@@ -314,6 +352,19 @@
 		font: inherit;
 		background: transparent;
 		color: inherit;
+	}
+
+	.clear-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 2.75rem;
+		height: 2.75rem;
+		border: 0;
+		background: transparent;
+		color: inherit;
+		cursor: pointer;
+		border-radius: 4px;
 	}
 
 	.people-toolbar__actions {

@@ -32,14 +32,77 @@ test.describe('people', () => {
 		await expect(page.getByRole('cell', { name: b.FirstName, exact: true })).toHaveCount(0);
 	});
 
+	test('search query is persisted in the URL', async ({ page }) => {
+		const term = `${prefix}-Url`;
+		const a = await createPerson(prefix, { FirstName: `${term}Alpha`, LastName: 'Search' });
+		const b = await createPerson(prefix, { FirstName: `${term}Beta`, LastName: 'Search' });
+		personIds.push(a['Auto ID'], b['Auto ID']);
+
+		await page.goto('/people');
+		const search = page.getByRole('searchbox', { name: 'Search' });
+		await fillTextField(search, term);
+		await expect.poll(() => new URL(page.url()).searchParams.get('q')).toBe(term);
+		await expect(page.locator('.result-count')).toHaveText(/2\s+people/i, { timeout: 15000 });
+
+		await page.getByRole('button', { name: 'Clear' }).click();
+		await expect.poll(() => new URL(page.url()).searchParams.get('q')).toBeNull();
+		await expect(search).toHaveValue('');
+
+		await page.goto(`/people?q=${encodeURIComponent(term)}`);
+		await expect(page.getByRole('searchbox', { name: 'Search' })).toHaveValue(term);
+		await expect(page.locator('.result-count')).toHaveText(/2\s+people/i, { timeout: 15000 });
+		await expect(page.getByRole('cell', { name: a.FirstName, exact: true })).toBeVisible();
+		await expect(page.getByRole('cell', { name: b.FirstName, exact: true })).toBeVisible();
+
+		await page.getByRole('link', { name: a.FirstName, exact: true }).click();
+		await expect(page.getByRole('heading', { name: /edit person/i })).toBeVisible({ timeout: 15000 });
+		await page.goBack();
+		await expect.poll(() => new URL(page.url()).searchParams.get('q')).toBe(term);
+		await expect(page.getByRole('searchbox', { name: 'Search' })).toHaveValue(term);
+		await expect(page.getByRole('cell', { name: a.FirstName, exact: true })).toBeVisible();
+		await expect(page.getByRole('cell', { name: b.FirstName, exact: true })).toBeVisible();
+	});
+
+	test('back restores the latest search, not an earlier one', async ({ page }) => {
+		const earlier = `${prefix}-Earlier`;
+		const latest = `${prefix}-Latest`;
+		const person = await createPerson(prefix, { FirstName: latest, LastName: 'Search' });
+		personIds.push(person['Auto ID']);
+
+		await page.goto('/people');
+		const search = page.getByRole('searchbox', { name: 'Search' });
+		await fillTextField(search, earlier);
+		await expect.poll(() => new URL(page.url()).searchParams.get('q')).toBe(earlier);
+
+		await fillTextField(search, latest);
+		await expect.poll(() => new URL(page.url()).searchParams.get('q')).toBe(latest);
+		await expect(page.getByRole('cell', { name: latest, exact: true })).toBeVisible({
+			timeout: 15000
+		});
+
+		await page.getByRole('link', { name: latest, exact: true }).click();
+		await expect(page.getByRole('heading', { name: /edit person/i })).toBeVisible({ timeout: 15000 });
+		await page.goBack();
+
+		const restored = page.getByRole('searchbox', { name: 'Search' });
+		await expect.poll(() => new URL(page.url()).searchParams.get('q')).toBe(latest);
+		await expect(restored).toHaveValue(latest);
+		await expect(async () => {
+			await new Promise((r) => setTimeout(r, 400));
+			expect(new URL(page.url()).searchParams.get('q')).toBe(latest);
+			expect(await restored.inputValue()).toBe(latest);
+		}).toPass({ timeout: 2000 });
+		await expect(page.getByRole('cell', { name: latest, exact: true })).toBeVisible();
+	});
+
 	test('create person via /people/new', async ({ page }) => {
 		const first = `${prefix}-New`;
 		const last = 'Person';
 		const sb = getServiceClient();
 
 		await page.goto('/people/new');
-		await page.getByLabel('First Name').fill(first);
-		await page.getByLabel('Last Name').fill(last);
+		await fillTextField(page.getByLabel('First Name'), first);
+		await fillTextField(page.getByLabel('Last Name'), last);
 		await page.getByRole('button', { name: /save/i }).click();
 
 		await expect

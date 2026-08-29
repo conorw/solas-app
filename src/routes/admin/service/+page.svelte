@@ -1,11 +1,8 @@
 <script lang="ts">
 	import type { service as ServiceRow } from '#lib/types/rows.js';
 	import DataTable, { Head, Body, Row, Cell, Label as TableLabel } from '@smui/data-table';
-	import FormField from '@smui/form-field';
-	import Button, { Icon, Label } from '@smui/button';
+	import Button, { Label } from '@smui/button';
 	import type { PageData } from './$types';
-	import Checkbox from '@smui/checkbox';
-	import Dialog, { Title, Content, Actions } from '@smui/dialog';
 	import Snackbar from '@smui/snackbar';
 	import IconButton from '@smui/icon-button';
 	import { Icon as CommonIcon } from '@smui/common';
@@ -142,10 +139,10 @@
 			<span class="result-count" aria-live="polite">
 				{services.length} {services.length === 1 ? 'service' : 'services'}
 			</span>
-			<Button type="button" onclick={openAddDialog} variant="unelevated" class="add-btn">
-				<Icon class="material-icons">add</Icon>
-				<Label>Add New Service</Label>
-			</Button>
+			<button type="button" class="add-btn native-add-btn" onclick={openAddDialog}>
+				<span class="material-icons" aria-hidden="true">add</span>
+				Add New Service
+			</button>
 		</div>
 	</header>
 
@@ -170,24 +167,26 @@
 								<span class="service-name">{item?.Name}</span>
 							</Cell>
 							<Cell>
-								<FormField>
-									<Checkbox
-										bind:checked={item['Is Current']}
-										input$onchange={(e) => onCurrentChange(item, e)}
-										input$aria-label={`Active: ${item.Name}`}
+								<label class="flag-control">
+									<input
+										type="checkbox"
+										checked={item['Is Current']}
+										aria-label={`Active: ${item.Name}`}
+										onchange={(e) => onCurrentChange(item, e)}
 									/>
-									{#snippet label()}Active{/snippet}
-								</FormField>
+									<span>Active</span>
+								</label>
 							</Cell>
 							<Cell>
-								<FormField>
-									<Checkbox
-										bind:checked={item.Multi}
-										input$onchange={(e) => onMultiChange(item, e)}
-										input$aria-label={`Multi event: ${item.Name}`}
+								<label class="flag-control">
+									<input
+										type="checkbox"
+										checked={item.Multi}
+										aria-label={`Multi event: ${item.Name}`}
+										onchange={(e) => onMultiChange(item, e)}
 									/>
-									{#snippet label()}Multi{/snippet}
-								</FormField>
+									<span>Multi</span>
+								</label>
 							</Cell>
 						</Row>
 					{/each}
@@ -203,51 +202,58 @@
 				</Button>
 			{:else}
 				<p>No services yet.</p>
-				<Button variant="unelevated" onclick={openAddDialog}>
-					<Icon class="material-icons">add</Icon>
-					<Label>Add New Service</Label>
-				</Button>
+				<button type="button" class="native-add-btn" onclick={openAddDialog}>
+					<span class="material-icons" aria-hidden="true">add</span>
+					Add New Service
+				</button>
 			{/if}
 		</div>
 	{/if}
 </div>
 
-<Dialog bind:open aria-labelledby="simple-title" aria-describedby="simple-content" role="dialog">
-	<Title id="simple-title">Add New Service</Title>
-	<Content id="simple-content">
-		<div class="dialog-body">
-			<label class="dialog-name-field">
-				<span class="dialog-name-field__label">Name</span>
-				<input
-					type="text"
-					class="dialog-name-input"
-					aria-label="Service name"
-					bind:value={newItem.Name}
-					oninput={onNameInput}
-				/>
-			</label>
-			{#if formError}
-				<p class="form-error" role="alert">{formError}</p>
-			{/if}
-			<FormField>
-				<Checkbox bind:checked={newItem['Is Current']} />
-				{#snippet label()}Active (available for attendance){/snippet}
-			</FormField>
-			<FormField>
-				<Checkbox bind:checked={newItem.Multi} />
-				{#snippet label()}Multi event (anonymous group count){/snippet}
-			</FormField>
+{#if open}
+	<div class="modal-backdrop">
+		<div
+			class="modal"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="simple-title"
+		>
+			<h2 id="simple-title">Add New Service</h2>
+			<div class="dialog-body">
+				<label class="dialog-name-field">
+					<span class="dialog-name-field__label">Name</span>
+					<input
+						type="text"
+						class="dialog-name-input"
+						aria-label="Service name"
+						bind:value={newItem.Name}
+						oninput={onNameInput}
+					/>
+				</label>
+				{#if formError}
+					<p class="form-error" role="alert">{formError}</p>
+				{/if}
+				<label class="flag-control">
+					<input type="checkbox" bind:checked={newItem['Is Current']} />
+					<span>Active (available for attendance)</span>
+				</label>
+				<label class="flag-control">
+					<input type="checkbox" bind:checked={newItem.Multi} />
+					<span>Multi event (anonymous group count)</span>
+				</label>
+			</div>
+			<div class="modal-actions">
+				<Button type="button" onclick={() => (open = false)} disabled={saving}>
+					<Label>Cancel</Label>
+				</Button>
+				<Button type="button" variant="raised" onclick={saveNewService} disabled={saving}>
+					<Label>Save</Label>
+				</Button>
+			</div>
 		</div>
-	</Content>
-	<Actions>
-		<Button onclick={() => (open = false)} disabled={saving}>
-			<Label>Cancel</Label>
-		</Button>
-		<Button variant="raised" onclick={saveNewService} disabled={saving}>
-			<Label>Save</Label>
-		</Button>
-	</Actions>
-</Dialog>
+	</div>
+{/if}
 
 <Snackbar bind:this={snackbar}>
 	<Label>{snackMessage}</Label>
@@ -311,6 +317,60 @@
 
 	:global(.add-btn) {
 		min-height: 2.75rem;
+	}
+
+	.native-add-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		min-height: 2.75rem;
+		padding: 0 1rem;
+		border: 0;
+		border-radius: 4px;
+		font: inherit;
+		font-weight: 500;
+		cursor: pointer;
+		background: var(--mdc-theme-primary, #40b3ff);
+		color: var(--mdc-theme-on-primary, #fff);
+	}
+
+	.flag-control {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.45rem;
+		white-space: nowrap;
+	}
+
+	.modal-backdrop {
+		position: fixed;
+		inset: 0;
+		z-index: 20;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 1rem;
+		background: color-mix(in srgb, #000 45%, transparent);
+	}
+
+	.modal {
+		width: min(26rem, 100%);
+		padding: 1.15rem 1.25rem 1rem;
+		border-radius: 8px;
+		background: var(--mdc-theme-surface, #fff);
+		color: inherit;
+		box-shadow: 0 12px 40px color-mix(in srgb, #000 28%, transparent);
+
+		h2 {
+			margin: 0 0 0.85rem;
+			font-size: 1.2rem;
+		}
+	}
+
+	.modal-actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: 0.5rem;
+		margin-top: 1rem;
 	}
 
 	.hint {
