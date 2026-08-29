@@ -1,0 +1,6 @@
+if [ ! -f .env ]; then
+  echo "Missing .env - copy .env.example and fill in Supabase test credentials before committing."
+  exit 1
+fi
+
+npm run test:precommit
