@@ -406,6 +406,12 @@
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 		gap: 0.85rem 1rem;
+		align-items: start;
+	}
+
+	.form-grid > :global(*) {
+		min-width: 0;
+		max-width: 100%;
 	}
 
 	@media (max-width: 640px) {
@@ -418,6 +424,9 @@
 	:global(.field .mdc-text-field),
 	:global(.field.mdc-select) {
 		width: 100%;
+		max-width: 100%;
+		min-width: 0;
+		box-sizing: border-box;
 	}
 
 	:global(.field--wide) {
@@ -428,7 +437,12 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.35rem;
-		justify-content: flex-end;
+		min-width: 0;
+	}
+
+	.field--dob :global(.solas-datepicker) {
+		display: block;
+		width: 100%;
 	}
 
 	.field-label {
@@ -443,10 +457,14 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.35rem;
+		min-width: 0;
 	}
 
 	.native-input {
+		box-sizing: border-box;
 		width: 100%;
+		max-width: 100%;
+		min-width: 0;
 		min-height: 3.25rem;
 		padding: 0.75rem 1rem;
 		border: 1px solid color-mix(in srgb, currentColor 24%, transparent);

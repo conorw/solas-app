@@ -153,7 +153,25 @@
 	}
 
 	:global(.tabs) {
+		width: 100%;
 		margin-bottom: 0.25rem;
+	}
+
+	:global(.tabs .mdc-tab-scroller__scroll-content) {
+		width: 100%;
+	}
+
+	:global(.tabs .mdc-tab) {
+		flex: 1 1 0;
+		min-width: 0;
+	}
+
+	.person-stats :global(.person-form) {
+		max-width: none;
+		width: 100%;
+		margin: 0;
+		padding-left: 0;
+		padding-right: 0;
 	}
 
 	.stat-cards {

@@ -111,6 +111,17 @@ async function ensureAnonymousPerson() {
 	} else {
 		console.log('anonymous person exists', anonId);
 	}
+
+	// Explicit Auto ID inserts do not advance IDENTITY sequences; sync so later
+	// inserts (directory seed, e2e "add person") do not collide with 2830.
+	await syncPeopleIdSequence();
+}
+
+/** Keep people."Auto ID" sequence at or above MAX("Auto ID"). */
+async function syncPeopleIdSequence() {
+	const { data, error } = await sb.rpc('sync_people_auto_id_seq');
+	if (error) throw error;
+	console.log('people Auto ID sequence synced to', data);
 }
 
 /** Remove prior stats seed so re-runs stay idempotent. */
@@ -424,6 +435,7 @@ await clearStatsSeed();
 await clearDirectorySeed();
 const result = await seedStatsData();
 const directoryCount = await seedDirectoryPeople();
+await syncPeopleIdSequence();
 
 console.log('seed ok');
 console.log(

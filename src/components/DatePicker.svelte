@@ -11,10 +11,27 @@
 
 	const min = DateTime.fromObject({ year: 1900, month: 1, day: 1 }).startOf('day');
 	const max = DateTime.fromObject({ year: 2100, month: 12, day: 31 }).endOf('day');
+	const months = [
+		'January',
+		'February',
+		'March',
+		'April',
+		'May',
+		'June',
+		'July',
+		'August',
+		'September',
+		'October',
+		'November',
+		'December'
+	];
+	const years = Array.from({ length: max.year - min.year + 1 }, (_, i) => max.year - i);
 
 	let open = $state(false);
 	let browse = $state(DateTime.fromJSDate(selected).startOf('month'));
 	let rootEl: HTMLDivElement | undefined = $state();
+	let inputText = $state(DateTime.fromJSDate(selected).toFormat('dd/MM/yyyy'));
+	let inputError = $state('');
 
 	let lastEmitted = untrack(() => selected?.getTime() ?? null);
 
@@ -23,6 +40,8 @@
 		const t = date?.getTime() ?? null;
 		if (t === null || t === lastEmitted) return;
 		lastEmitted = t;
+		inputText = DateTime.fromJSDate(date).toFormat('dd/MM/yyyy');
+		inputError = '';
 		onChange(date);
 	});
 
@@ -32,10 +51,7 @@
 		}
 	});
 
-	const displayText = $derived(DateTime.fromJSDate(selected).toFormat('dd/MM/yyyy'));
 	const sidebarText = $derived(DateTime.fromJSDate(selected).toFormat('ccc, d LLL yyyy'));
-	const monthLabel = $derived(browse.toFormat('MMMM yyyy'));
-
 	const weekdayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 	type DayCell = {
@@ -46,7 +62,6 @@
 	};
 
 	const days = $derived.by(() => {
-		// Luxon weeks start on Monday; match the old Sunday-first grid.
 		const monthStart = browse.startOf('month');
 		const gridStart = monthStart.minus({ days: monthStart.weekday % 7 });
 		const selectedDay = DateTime.fromJSDate(selected).startOf('day');
@@ -67,12 +82,40 @@
 		return cells;
 	});
 
+	function parseTypedDate(raw: string): DateTime | null {
+		const text = raw.trim();
+		if (!text) return null;
+		const formats = ['dd/MM/yyyy', 'd/M/yyyy', 'dd-MM-yyyy', 'd-M-yyyy', 'yyyy-MM-dd'];
+		for (const format of formats) {
+			const parsed = DateTime.fromFormat(text, format);
+			if (parsed.isValid) return parsed.startOf('day');
+		}
+		return null;
+	}
+
 	function emit(date: DateTime) {
+		if (date < min || date > max) {
+			inputError = 'Date must be between 01/01/1900 and 31/12/2100';
+			return;
+		}
 		const js = date.toJSDate();
 		selected = js;
 		lastEmitted = js.getTime();
+		inputText = date.toFormat('dd/MM/yyyy');
+		inputError = '';
 		onChange(js);
 		open = false;
+		browse = date.startOf('month');
+	}
+
+	function commitTypedDate() {
+		const parsed = parseTypedDate(inputText);
+		if (!parsed) {
+			inputText = DateTime.fromJSDate(selected).toFormat('dd/MM/yyyy');
+			inputError = 'Use dd/mm/yyyy';
+			return;
+		}
+		emit(parsed);
 	}
 
 	function selectDay(cell: DayCell) {
@@ -91,6 +134,14 @@
 		browse = browse.plus({ months: 1 }).startOf('month');
 	}
 
+	function setBrowseMonth(month: number) {
+		browse = browse.set({ month }).startOf('month');
+	}
+
+	function setBrowseYear(year: number) {
+		browse = browse.set({ year }).startOf('month');
+	}
+
 	function onDocPointerDown(event: PointerEvent) {
 		if (!open || !rootEl) return;
 		if (!rootEl.contains(event.target as Node)) {
@@ -105,6 +156,13 @@
 		}
 	}
 
+	function onInputKeydown(event: KeyboardEvent) {
+		if (event.key === 'Enter') {
+			event.preventDefault();
+			commitTypedDate();
+		}
+	}
+
 	$effect(() => {
 		if (!open) return;
 		document.addEventListener('pointerdown', onDocPointerDown);
@@ -114,15 +172,41 @@
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="solas-datepicker" bind:this={rootEl} onkeydown={onKeydown}>
-	<button
-		type="button"
-		class="solas-datepicker__trigger"
-		aria-haspopup="dialog"
-		aria-expanded={open}
-		onclick={() => (open = !open)}
-	>
-		{displayText}
-	</button>
+	<div class="solas-datepicker__field">
+		<input
+			type="text"
+			class="solas-datepicker__input"
+			class:solas-datepicker__input--error={!!inputError}
+			aria-label="Date"
+			aria-invalid={inputError ? 'true' : undefined}
+			aria-describedby={inputError ? 'solas-datepicker-error' : undefined}
+			placeholder="dd/mm/yyyy"
+			autocomplete="bday"
+			inputmode="numeric"
+			bind:value={inputText}
+			onblur={commitTypedDate}
+			onkeydown={onInputKeydown}
+			onfocus={() => (inputError = '')}
+		/>
+		<button
+			type="button"
+			class="solas-datepicker__calendar-btn"
+			aria-haspopup="dialog"
+			aria-expanded={open}
+			aria-label="Open calendar"
+			onclick={() => (open = !open)}
+		>
+			<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+				<path
+					fill="currentColor"
+					d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"
+				/>
+			</svg>
+		</button>
+	</div>
+	{#if inputError}
+		<p id="solas-datepicker-error" class="solas-datepicker__error" role="alert">{inputError}</p>
+	{/if}
 
 	{#if open}
 		<div class="solas-datepicker__popup" role="dialog" aria-label="Choose date">
@@ -136,7 +220,34 @@
 							/></svg
 						>
 					</button>
-					<div class="solas-datepicker__month">{monthLabel}</div>
+					<div class="solas-datepicker__selectors">
+						<label class="solas-datepicker__select-wrap">
+							<span class="visually-hidden">Month</span>
+							<select
+								class="solas-datepicker__select"
+								aria-label="Month"
+								value={browse.month}
+								onchange={(e) => setBrowseMonth(Number(e.currentTarget.value))}
+							>
+								{#each months as name, i}
+									<option value={i + 1}>{name}</option>
+								{/each}
+							</select>
+						</label>
+						<label class="solas-datepicker__select-wrap">
+							<span class="visually-hidden">Year</span>
+							<select
+								class="solas-datepicker__select solas-datepicker__select--year"
+								aria-label="Year"
+								value={browse.year}
+								onchange={(e) => setBrowseYear(Number(e.currentTarget.value))}
+							>
+								{#each years as year}
+									<option value={year}>{year}</option>
+								{/each}
+							</select>
+						</label>
+					</div>
 					<button type="button" class="solas-datepicker__nav" aria-label="Next month" onclick={nextMonth}>
 						<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"
 							><path
@@ -192,9 +303,11 @@
 		--dp-sidebar-bg: #111;
 		--dp-sidebar-fg: #fff;
 		--dp-shadow: 0 8px 28px rgba(0, 0, 0, 0.22);
+		--dp-error: var(--mdc-theme-error, #b00020);
 
 		position: relative;
-		display: inline-block;
+		display: block;
+		width: 100%;
 		font-family: Roboto, system-ui, sans-serif;
 		color: var(--dp-on-surface);
 	}
@@ -208,23 +321,63 @@
 		}
 	}
 
-	.solas-datepicker__trigger {
-		min-width: 7.5rem;
-		padding: 0.45rem 0.65rem;
+	.solas-datepicker__field {
+		display: flex;
+		align-items: stretch;
+		width: 100%;
+		min-width: 0;
+	}
+
+	.solas-datepicker__input {
+		box-sizing: border-box;
+		flex: 1 1 auto;
+		min-width: 0;
+		min-height: 3.25rem;
+		padding: 0.75rem 0.85rem;
 		border: 1px solid var(--dp-border);
-		border-radius: 3px;
+		border-right: none;
+		border-radius: 3px 0 0 3px;
 		background: var(--dp-surface);
 		color: var(--dp-on-surface);
 		font: inherit;
 		font-size: 0.95rem;
-		text-align: left;
-		cursor: pointer;
 	}
 
-	.solas-datepicker__trigger:focus-visible {
+	.solas-datepicker__input--error {
+		border-color: var(--dp-error);
+	}
+
+	.solas-datepicker__input:focus {
 		outline: none;
 		border-color: var(--dp-primary);
 		box-shadow: 0 0 0 2px color-mix(in srgb, var(--dp-primary) 35%, transparent);
+		z-index: 1;
+	}
+
+	.solas-datepicker__calendar-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		flex: 0 0 3.25rem;
+		min-height: 3.25rem;
+		padding: 0;
+		border: 1px solid var(--dp-border);
+		border-radius: 0 3px 3px 0;
+		background: var(--dp-surface);
+		color: var(--dp-muted);
+		cursor: pointer;
+	}
+
+	.solas-datepicker__calendar-btn:hover,
+	.solas-datepicker__calendar-btn[aria-expanded='true'] {
+		color: var(--dp-on-surface);
+		background: var(--dp-day-hover);
+	}
+
+	.solas-datepicker__error {
+		margin: 0.35rem 0 0;
+		font-size: 0.8rem;
+		color: var(--dp-error);
 	}
 
 	.solas-datepicker__popup {
@@ -252,14 +405,51 @@
 		display: grid;
 		grid-template-columns: 2.5rem 1fr 2.5rem;
 		align-items: center;
+		gap: 0.35rem;
 		margin-bottom: 0.65rem;
 	}
 
-	.solas-datepicker__month {
-		text-align: center;
-		font-size: 1.05rem;
-		font-weight: 500;
+	.solas-datepicker__selectors {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 0.4rem;
+		min-width: 0;
+	}
+
+	.solas-datepicker__select-wrap {
+		min-width: 0;
+	}
+
+	.solas-datepicker__select {
+		box-sizing: border-box;
+		max-width: 100%;
+		min-height: 2.25rem;
+		padding: 0.25rem 0.45rem;
+		border: 1px solid var(--dp-border);
+		border-radius: 3px;
+		background: var(--dp-surface);
 		color: var(--dp-on-surface);
+		font: inherit;
+		font-size: 0.95rem;
+		font-weight: 500;
+		cursor: pointer;
+	}
+
+	.solas-datepicker__select--year {
+		min-width: 4.75rem;
+	}
+
+	.visually-hidden {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
 	}
 
 	.solas-datepicker__nav {
