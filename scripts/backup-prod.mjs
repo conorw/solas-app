@@ -1,7 +1,6 @@
 /**
  * Dump production Postgres (roles, schema, data) to a dated local folder,
- * upload a tarball to the private db-backups Storage bucket, then keep
- * at most MAX_BACKUPS copies in Storage and in local backups/.
+ * upload a tarball to the private db-backups Storage bucket.
  *
  * Usage: npm run backup:prod
  *
@@ -14,14 +13,13 @@
  */
 import { createClient } from '@supabase/supabase-js';
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
 const BUCKET = 'db-backups';
-const MAX_BACKUPS = 12;
 const DUMP_FILES = ['roles.sql', 'schema.sql', 'data.sql'];
 
 function loadEnv() {
@@ -234,22 +232,6 @@ function packTarball() {
 	}
 }
 
-function pruneLocal() {
-	if (!existsSync(backupsRoot)) return;
-	const stamps = readdirSync(backupsRoot)
-		.filter((name) => {
-			const full = join(backupsRoot, name);
-			return statSync(full).isDirectory() && existsSync(join(full, 'data.sql'));
-		})
-		.sort();
-	const extra = stamps.slice(0, Math.max(0, stamps.length - MAX_BACKUPS));
-	for (const old of extra) {
-		rmSync(join(backupsRoot, old), { recursive: true, force: true });
-		rmSync(join(backupsRoot, `${old}.tar.gz`), { force: true });
-		console.log('pruned local backup', old);
-	}
-}
-
 async function ensureBucket(sb) {
 	const listed = await sb.storage.listBuckets();
 	if (listed.error) throw listed.error;
@@ -260,23 +242,6 @@ async function ensureBucket(sb) {
 	});
 	if (created.error) throw created.error;
 	console.log('created bucket', BUCKET);
-}
-
-async function pruneStorage(sb) {
-	const listed = await sb.storage.from(BUCKET).list('', {
-		limit: 100,
-		sortBy: { column: 'name', order: 'asc' }
-	});
-	if (listed.error) throw listed.error;
-	const objects = (listed.data ?? [])
-		.map((row) => row.name)
-		.filter((name) => name.endsWith('.tar.gz'))
-		.sort();
-	const extra = objects.slice(0, Math.max(0, objects.length - MAX_BACKUPS));
-	if (!extra.length) return;
-	const removed = await sb.storage.from(BUCKET).remove(extra);
-	if (removed.error) throw removed.error;
-	for (const name of extra) console.log('pruned storage backup', name);
 }
 
 async function main() {
@@ -314,10 +279,7 @@ async function main() {
 	});
 	if (uploaded.error) throw uploaded.error;
 	console.log('uploaded', `${BUCKET}/${tarName}`);
-
-	await pruneStorage(sb);
-	pruneLocal();
-	console.log('done; kept at most', MAX_BACKUPS, 'backups');
+	console.log('done');
 }
 
 main().catch((err) => {
