@@ -1,9 +1,8 @@
 import type { person } from '#lib/types/rows.js';
-import type { PageLoad } from './$types';
+import type { PageServerLoad } from './$types';
 
-export const load: PageLoad = async (event) => {
-	const parent = await event.parent();
-	const peopleData = await parent.supabase
+export const load: PageServerLoad = async ({ locals: { supabase } }) => {
+	const peopleData = await supabase
 		.from('people')
 		.select(`"Auto ID", "FirstName", "LastName", "DateOfBirth"`);
 

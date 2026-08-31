@@ -7,7 +7,6 @@ function isPath(pathname: string, segment: string) {
 
 export const load: LayoutServerLoad = async ({
 	locals: { safeGetSession, supabase },
-	cookies,
 	url
 }) => {
 	const { session, user } = await safeGetSession();
@@ -28,7 +27,6 @@ export const load: LayoutServerLoad = async ({
 
 	return {
 		session,
-		profile,
-		cookies: cookies.getAll()
+		profile
 	};
 };
