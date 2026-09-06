@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { loadEnv } from './helpers/env';
 import { cleanupFixtures, createPerson, runId } from './helpers/fixtures';
+import { gotoStable } from './helpers/nav';
 import { getServiceClient } from './helpers/supabase';
 import { fillTextField } from './helpers/smui';
 
@@ -106,6 +107,10 @@ test.describe('people', () => {
 		});
 		await fillTextField(page.getByLabel('First Name'), first);
 		await fillTextField(page.getByLabel('Last Name'), last);
+		const leftForm = page
+			.waitForURL((url) => !url.pathname.endsWith('/people/new'), { timeout: 15000 })
+			.catch(() => null);
+
 		await page.getByTestId('save-person').click();
 
 		await expect
@@ -126,7 +131,8 @@ test.describe('people', () => {
 			)
 			.not.toBeNull();
 
-		await page.goto('/people', { waitUntil: 'domcontentloaded' });
+		await leftForm;
+		await gotoStable(page, '/people');
 		const search = page.getByRole('searchbox', { name: 'Search' });
 		await fillTextField(search, first);
 		await expect(page.getByRole('cell', { name: first, exact: true })).toBeVisible({
@@ -143,8 +149,9 @@ test.describe('people', () => {
 		});
 		personIds.push(person['Auto ID']);
 		const sb = getServiceClient();
+		const editPath = `/people/${person['Auto ID']}`;
 
-		await page.goto(`/people/${person['Auto ID']}`);
+		await page.goto(editPath);
 		await expect(page.getByTestId('person-form')).toHaveAttribute('data-ready', 'true', {
 			timeout: 15000
 		});
@@ -152,6 +159,12 @@ test.describe('people', () => {
 		const lastNameField = page.locator('.person-form').getByLabel('Last Name');
 		await fillTextField(lastNameField, 'Updated');
 		await expect(lastNameField).toHaveValue('Updated');
+
+		// PersonForm calls history.back() after save — wait so it does not abort the list goto.
+		const leftEdit = page
+			.waitForURL((url) => url.pathname !== editPath, { timeout: 15000 })
+			.catch(() => null);
+
 		await page.getByTestId('save-person').click();
 
 		await expect
@@ -168,7 +181,8 @@ test.describe('people', () => {
 			)
 			.toBe('Updated');
 
-		await page.goto('/people', { waitUntil: 'domcontentloaded' });
+		await leftEdit;
+		await gotoStable(page, '/people');
 		await fillTextField(page.getByRole('searchbox', { name: 'Search' }), firstName);
 		const row = page.locator('tr', { hasText: firstName });
 		await expect(row).toBeVisible({ timeout: 15000 });
