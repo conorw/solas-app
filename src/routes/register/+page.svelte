@@ -2,6 +2,7 @@
 	import Button, { Label } from '@smui/button';
 	import Textfield from '@smui/textfield';
 	import { enhance } from '$app/forms';
+	import { capture } from '#lib/analytics.js';
 
 	let error = $state('');
 </script>
@@ -20,6 +21,7 @@
 				return async ({ result, update }) => {
 					if (result.type === 'failure') {
 						error = (result.data as { error?: string })?.error || 'Registration failed.';
+						capture('staff_register_failed');
 					} else if (result.type === 'success') {
 						error = '';
 						window.location.href = '/';

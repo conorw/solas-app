@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { refreshAll } from '$app/navigation';
+	import { afterNavigate, refreshAll } from '$app/navigation';
 	import Button, { Label, Icon as ButtonIcon } from '@smui/button';
 	import { Icon } from '@smui/common';
 	import { onMount } from 'svelte';
@@ -51,17 +51,43 @@
 	});
 
 	onMount(() => {
+		let cancelled = false;
+		void (async () => {
+			const analytics = await import('#lib/analytics.js');
+			if (cancelled) return;
+			await analytics.initAnalytics();
+			analytics.capturePageview(page.url);
+			if (data.session?.user?.id) {
+				analytics.identifyStaff(data.session.user.id, Boolean(data.profile?.isAdmin));
+			}
+		})();
+
 		const {
 			data: { subscription }
 		} = data.supabase.auth.onAuthStateChange((event) => {
 			if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
 				refreshAll();
 			}
+			if (event === 'SIGNED_OUT') {
+				void import('#lib/analytics.js').then((analytics) => analytics.resetAnalytics());
+			}
 		});
 
 		return () => {
+			cancelled = true;
 			subscription.unsubscribe();
 		};
+	});
+
+	$effect(() => {
+		const userId = data.session?.user?.id;
+		if (!userId) return;
+		const isAdmin = Boolean(data.profile?.isAdmin);
+		void import('#lib/analytics.js').then((analytics) => analytics.identifyStaff(userId, isAdmin));
+	});
+
+	afterNavigate(() => {
+		void import('#lib/analytics.js').then((analytics) => analytics.capturePageview(page.url));
 	});
 
 	$effect(() => {

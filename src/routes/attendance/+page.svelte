@@ -13,6 +13,7 @@
 	import Dialog, { Title, Content, Actions } from '@smui/dialog';
 	import Snackbar from '@smui/snackbar';
 	import { ANONYMOUS_PERSON_ID } from '#lib/constants.js';
+	import { capture } from '#lib/analytics.js';
 	import {
 		capitalizeFirstLetter,
 		getPersonDisplayName,
@@ -49,9 +50,7 @@
 	const attendanceFields = `"Auto ID", "Person Name", "Person Id", "ServiceName", Multi, TotalAttendees`;
 
 	const canAdd = $derived(!!selectedPerson && !!selectedService && !!selectedDate);
-	const isToday = $derived(
-		DateTime.fromJSDate(selectedDate).hasSame(DateTime.now(), 'day')
-	);
+	const isToday = $derived(DateTime.fromJSDate(selectedDate).hasSame(DateTime.now(), 'day'));
 
 	function showSnack(message: string) {
 		snackMessage = message;
@@ -98,6 +97,7 @@
 			const added = ret.data?.[0];
 			if (added) lastAddedId = added['Auto ID'];
 			showSnack(`Added ${count} for ${service.Name}`);
+			capture('attendance_multi_added', { serviceName: service.Name, count });
 		}
 	}
 
@@ -125,9 +125,7 @@
 	});
 
 	const deleteAttendance = async (attend: any) => {
-		const label = attend.Multi
-			? `${attend['ServiceName']} (multi)`
-			: attend['Person Name'];
+		const label = attend.Multi ? `${attend['ServiceName']} (multi)` : attend['Person Name'];
 		if (!confirm(`Remove ${label} from this day's attendance?`)) {
 			return;
 		}
@@ -137,6 +135,7 @@
 		} else {
 			attendance = attendance.filter((a) => a['Auto ID'] !== attend['Auto ID']);
 			showSnack(`Removed ${label}`);
+			capture('attendance_removed', { isMulti: Boolean(attend.Multi) });
 		}
 	};
 
@@ -155,6 +154,7 @@
 					return a;
 				}
 			});
+			capture('attendance_multi_count_changed', { count: attend.TotalAttendees });
 		}
 	};
 
@@ -179,6 +179,7 @@
 					return a;
 				}
 			});
+			capture('attendance_service_changed', { serviceName: attend.ServiceName });
 		}
 	};
 
@@ -194,6 +195,7 @@
 		);
 		if (alreadyOnList) {
 			const name = getPersonDisplayName(selectedPerson);
+			capture('attendance_duplicate_prompted');
 			if (!confirm(`${name} is already on this day's list. Add again?`)) {
 				return;
 			}
@@ -217,6 +219,7 @@
 			const added = ret.data?.[0];
 			if (added) lastAddedId = added['Auto ID'];
 			showSnack(`Added ${getPersonDisplayName(selectedPerson)}`);
+			capture('attendance_named_added', { serviceName: selectedService.Name });
 			selectedPerson = undefined;
 		}
 	};
@@ -268,10 +271,7 @@
 				<IconButton aria-label="Previous day" onclick={() => shiftDay(-1)}>
 					<Icon class="material-icons">chevron_left</Icon>
 				</IconButton>
-				<DatePicker
-					onChange={(e) => navigateToDate(e)}
-					selected={selectedDate}
-				/>
+				<DatePicker onChange={(e) => navigateToDate(e)} selected={selectedDate} />
 				<IconButton aria-label="Next day" onclick={() => shiftDay(1)}>
 					<Icon class="material-icons">chevron_right</Icon>
 				</IconButton>
@@ -325,12 +325,7 @@
 			<p class="form-error" role="alert">{formError}</p>
 		{/if}
 
-		<Button
-			onclick={addAttendee}
-			variant="raised"
-			class="add-btn"
-			disabled={!canAdd}
-		>
+		<Button onclick={addAttendee} variant="raised" class="add-btn" disabled={!canAdd}>
 			<Label>Add to list</Label>
 		</Button>
 
@@ -359,27 +354,18 @@
 		{#if attendance?.length}
 			<ul class="attendee-list">
 				{#each attendance as attend (attend['Auto ID'])}
-					<li
-						class="attendee-row"
-						class:attendee-row--flash={lastAddedId === attend['Auto ID']}
-					>
+					<li class="attendee-row" class:attendee-row--flash={lastAddedId === attend['Auto ID']}>
 						{#if attend.Multi}
 							<div class="attendee-row__info">
 								<span class="attendee-row__name">{attend['ServiceName']}</span>
 								<span class="attendee-row__meta">Multi event</span>
 							</div>
 							<div class="stepper" aria-label="Participant count">
-								<IconButton
-									aria-label="Decrease count"
-									onclick={() => bumpMultiCount(attend, -1)}
-								>
+								<IconButton aria-label="Decrease count" onclick={() => bumpMultiCount(attend, -1)}>
 									<Icon class="material-icons">remove</Icon>
 								</IconButton>
 								<span class="stepper__value">{attend['TotalAttendees']}</span>
-								<IconButton
-									aria-label="Increase count"
-									onclick={() => bumpMultiCount(attend, 1)}
-								>
+								<IconButton aria-label="Increase count" onclick={() => bumpMultiCount(attend, 1)}>
 									<Icon class="material-icons">add</Icon>
 								</IconButton>
 							</div>
@@ -400,10 +386,7 @@
 							</div>
 						{/if}
 						<div class="attendee-row__delete">
-							<IconButton
-								aria-label="Remove attendee"
-								onclick={() => deleteAttendance(attend)}
-							>
+							<IconButton aria-label="Remove attendee" onclick={() => deleteAttendance(attend)}>
 								<Icon class="material-icons">delete</Icon>
 							</IconButton>
 						</div>
@@ -437,10 +420,7 @@
 				<Icon class="material-icons">remove</Icon>
 			</IconButton>
 			<span class="stepper__value">{participantCount}</span>
-			<IconButton
-				aria-label="Increase count"
-				onclick={() => (participantCount += 1)}
-			>
+			<IconButton aria-label="Increase count" onclick={() => (participantCount += 1)}>
 				<Icon class="material-icons">add</Icon>
 			</IconButton>
 		</div>
@@ -632,11 +612,7 @@
 
 	@keyframes flash-row {
 		from {
-			background: color-mix(
-				in srgb,
-				var(--mdc-theme-primary, #ff3e00) 28%,
-				transparent
-			);
+			background: color-mix(in srgb, var(--mdc-theme-primary, #ff3e00) 28%, transparent);
 		}
 		to {
 			background: transparent;

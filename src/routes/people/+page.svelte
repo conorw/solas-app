@@ -12,6 +12,7 @@
 	import { page } from '$app/state';
 	import { getPersonDisplayName } from '#lib/person.js';
 	import { virtualWindow } from '#lib/virtualWindow.js';
+	import { capture } from '#lib/analytics.js';
 
 	interface Props {
 		data: PageData;
@@ -69,6 +70,8 @@
 			lastSearchQuery = q;
 			scrollTop = 0;
 			if (panelEl) panelEl.scrollTop = 0;
+			const queryLength = q.trim().length;
+			if (queryLength > 0) capture('people_search', { queryLength });
 		});
 	});
 
@@ -177,6 +180,7 @@
 		snackMessage = `Person ${personRow.FirstName} ${personRow.LastName} deleted successfully`;
 		snackbar.open();
 		peopleOverride = peopleList.filter((p) => p['Auto ID'] != personRow['Auto ID']);
+		capture('person_deleted');
 	}
 </script>
 

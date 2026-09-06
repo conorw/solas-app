@@ -2,6 +2,7 @@
 	import { preventDefault } from 'svelte/legacy';
 	import Button, { Label } from '@smui/button';
 	import Textfield from '@smui/textfield';
+	import { capture } from '#lib/analytics.js';
 
 	let email = $state('');
 	let password = $state('');
@@ -53,6 +54,7 @@
 							'Login failed. Check your email and password.';
 						error = String(msg);
 						password = '';
+						capture('login_failed');
 						return;
 					}
 				}
@@ -62,8 +64,10 @@
 
 			error = 'Login failed. Check your email and password.';
 			password = '';
+			capture('login_failed');
 		} catch {
 			error = 'Could not reach the server. Try again.';
+			capture('login_failed');
 		} finally {
 			loading = false;
 		}
@@ -96,6 +100,7 @@
 				(typeof payload === 'object' && payload && payload.message) ||
 				'If an account exists for that email, a password reset link has been sent. Check your inbox.';
 			info = String(message);
+			capture('password_reset_requested');
 		} catch {
 			error = 'Could not reach the server. Try again.';
 		} finally {
@@ -134,9 +139,7 @@
 				<Button class="auth-submit" variant="raised" type="submit" disabled={loading}>
 					<Label>{loading ? 'Signing in…' : 'Login'}</Label>
 				</Button>
-				<button type="button" class="auth-link" onclick={showReset}>
-					Forgot password?
-				</button>
+				<button type="button" class="auth-link" onclick={showReset}> Forgot password? </button>
 			</form>
 		{:else}
 			<h1>Reset password</h1>

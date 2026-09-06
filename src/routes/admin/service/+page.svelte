@@ -7,6 +7,7 @@
 	import IconButton from '@smui/icon-button';
 	import { Icon as CommonIcon } from '@smui/common';
 	import { onMount } from 'svelte';
+	import { capture } from '#lib/analytics.js';
 
 	interface Props {
 		data: PageData;
@@ -84,6 +85,7 @@
 		servicesOverride = (servicesOverride ?? allServices).map((row) =>
 			row['Auto ID'] === item['Auto ID'] ? { ...row, [field]: checked } : row
 		);
+		capture('service_flag_toggled', { flag: field });
 	}
 
 	async function onCurrentChange(item: ServiceRow, e: Event) {
@@ -121,6 +123,7 @@
 		newItem = { Name: '', 'Is Current': true, Multi: false };
 		open = false;
 		showSnack(`Added ${created.Name}`);
+		capture('service_created');
 	}
 </script>
 
@@ -143,7 +146,8 @@
 		</div>
 		<div class="service-toolbar__actions">
 			<span class="result-count" aria-live="polite">
-				{services.length} {services.length === 1 ? 'service' : 'services'}
+				{services.length}
+				{services.length === 1 ? 'service' : 'services'}
 			</span>
 			<button
 				type="button"
@@ -265,7 +269,12 @@
 				</label>
 			</div>
 			<div class="modal-actions">
-				<button type="button" class="native-footer-btn" onclick={() => (open = false)} disabled={saving}>
+				<button
+					type="button"
+					class="native-footer-btn"
+					onclick={() => (open = false)}
+					disabled={saving}
+				>
 					Cancel
 				</button>
 				<button

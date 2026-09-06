@@ -2,6 +2,8 @@
 
 SvelteKit app for tracking attendance. Uses Supabase for auth and data.
 
+Optional: set `PUBLIC_POSTHOG_KEY` and `PUBLIC_POSTHOG_HOST` (EU default) for staff-app usage analytics. Session replay and autocapture are off; events do not include PII. Leave the key empty locally and in CI.
+
 ## Developing
 
 Local work always uses **local Supabase** (`supabase start`), not a remote staging project — even if `.env` still has remote keys.

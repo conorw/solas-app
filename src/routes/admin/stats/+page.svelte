@@ -13,6 +13,7 @@
 	import { goto } from '$app/navigation';
 	import { exportData } from '#lib/types/utils.js';
 	import { onMount, tick } from 'svelte';
+	import { capture } from '#lib/analytics.js';
 
 	type PdfSectionKey =
 		| 'summary'
@@ -91,9 +92,7 @@
 	const popularName = $derived(
 		data.groupedService?.length ? String(data.groupedService[0][0]) : 'No data'
 	);
-	const popularCount = $derived(
-		data.groupedService?.length ? data.groupedService[0][1].length : 0
-	);
+	const popularCount = $derived(data.groupedService?.length ? data.groupedService[0][1].length : 0);
 
 	const chartHeight = $derived(
 		`${Math.max(280, Math.min(560, 72 + serviceChartData.length * 44))}px`
@@ -197,10 +196,12 @@
 	async function exportPeople() {
 		const peopleData = await page.data.supabase.from('people').select('*');
 		exportData(peopleData.data, 'people.csv');
+		capture('stats_exported', { exportType: 'people_csv' });
 	}
 
 	function exportAttendance() {
 		exportData(data.stats, 'attendance.csv');
+		capture('stats_exported', { exportType: 'attendance_csv' });
 	}
 
 	function openPdfDialog() {
@@ -230,6 +231,7 @@
 		requestAnimationFrame(() => {
 			window.print();
 		});
+		capture('stats_exported', { exportType: 'pdf' });
 	}
 </script>
 
@@ -279,11 +281,7 @@
 	</header>
 
 	{#if data.stats?.length}
-		<section
-			class="stat-cards"
-			class:pdf-omit={omitSection('summary')}
-			aria-label="Summary"
-		>
+		<section class="stat-cards" class:pdf-omit={omitSection('summary')} aria-label="Summary">
 			<div class="stat-card">
 				<span class="stat-card__label">Unique people</span>
 				<span class="stat-card__value">{data.groupedUser.length}</span>
@@ -375,8 +373,7 @@
 			>
 				<h2 id="who-attended-heading" class="section-block__title">Who attended</h2>
 				<p class="section-block__lede">
-					Unique named people in this range ({who.uniqueNamed}), excluding anonymous multi
-					sessions.
+					Unique named people in this range ({who.uniqueNamed}), excluding anonymous multi sessions.
 				</p>
 
 				<div class="stat-cards stat-cards--five">
@@ -448,9 +445,7 @@
 					</div>
 					<div class="stat-card">
 						<span class="stat-card__label">Has referral source</span>
-						<span class="stat-card__value"
-							>{who.uniqueNamed - who.referralBlank}</span
-						>
+						<span class="stat-card__value">{who.uniqueNamed - who.referralBlank}</span>
 					</div>
 				</div>
 
@@ -462,10 +457,7 @@
 					</section>
 					<section class="chart-panel">
 						{#key chartTheme + 'support'}
-							<BarChartSimple
-								data={otherSupportChartData}
-								options={otherSupportChartOptions}
-							/>
+							<BarChartSimple data={otherSupportChartData} options={otherSupportChartOptions} />
 						{/key}
 					</section>
 				</div>
@@ -489,15 +481,10 @@
 				<FormField>
 					<Checkbox
 						checked={pdfSections[option.key]}
-						disabled={
-							(option.key === 'whoAttended' || option.key === 'referral') &&
-							!hasWhoAttended
-						}
+						disabled={(option.key === 'whoAttended' || option.key === 'referral') &&
+							!hasWhoAttended}
 						onclick={() => {
-							if (
-								(option.key === 'whoAttended' || option.key === 'referral') &&
-								!hasWhoAttended
-							) {
+							if ((option.key === 'whoAttended' || option.key === 'referral') && !hasWhoAttended) {
 								return;
 							}
 							pdfSections[option.key] = !pdfSections[option.key];
@@ -512,12 +499,7 @@
 		<Button onclick={() => (pdfDialogOpen = false)}>
 			<Label>Cancel</Label>
 		</Button>
-		<Button
-			onclick={confirmPdfExport}
-			action="accept"
-			variant="raised"
-			disabled={!pdfHasSelection}
-		>
+		<Button onclick={confirmPdfExport} action="accept" variant="raised" disabled={!pdfHasSelection}>
 			<Label>Export PDF</Label>
 		</Button>
 	</Actions>

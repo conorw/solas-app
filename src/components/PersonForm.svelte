@@ -11,6 +11,7 @@
 	import Checkbox from '@smui/checkbox';
 	import FormField from '@smui/form-field';
 	import { onMount } from 'svelte';
+	import { capture } from '#lib/analytics.js';
 
 	interface Props {
 		person: PersonRow;
@@ -45,9 +46,7 @@
 	);
 
 	const dobSelected = $derived(
-		person?.DateOfBirth
-			? DateTime.fromISO(person.DateOfBirth).toJSDate()
-			: new Date('1980-01-01')
+		person?.DateOfBirth ? DateTime.fromISO(person.DateOfBirth).toJSDate() : new Date('1980-01-01')
 	);
 
 	function showSnack(message: string, sticky = false) {
@@ -74,6 +73,7 @@
 		if (!first || !last) {
 			formError = 'First name and last name are required.';
 			showSnack(formError, true);
+			capture('person_save_failed');
 			return;
 		}
 		person.FirstName = first;
@@ -93,9 +93,11 @@
 		if (ret.error) {
 			formError = ret.error.message;
 			showSnack(ret.error.message, true);
+			capture('person_save_failed');
 			return;
 		}
 		showSnack('Saved successfully');
+		capture(isNew ? 'person_created' : 'person_updated');
 		onSave();
 	}
 </script>
@@ -176,11 +178,7 @@
 				<Option value="Marketing">Marketing</Option>
 				<Option value="Other">Other (Please Specify)</Option>
 			</Select>
-			<Select
-				class="field field--wide"
-				label="Other Support?"
-				bind:value={person['Other Support']}
-			>
+			<Select class="field field--wide" label="Other Support?" bind:value={person['Other Support']}>
 				<Option value="" />
 				<Option value="BCW">BCW</Option>
 				<Option value="CAT">CAT</Option>
@@ -254,11 +252,7 @@
 					<Option value="Irish Traveller">Irish Traveller</Option>
 					<Option value="Other">Other</Option>
 				</Select>
-				<Select
-					class="field"
-					label="Sexual Orientation"
-					bind:value={person['Sexual Orientation']}
-				>
+				<Select class="field" label="Sexual Orientation" bind:value={person['Sexual Orientation']}>
 					<Option value="" />
 					<Option value="Bisexual">Bisexual</Option>
 					<Option value="Hetrosexual">Hetrosexual</Option>

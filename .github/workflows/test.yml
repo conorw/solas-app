@@ -24,6 +24,9 @@ jobs:
         run: npm ci
 
       - name: Unit tests
+        env:
+          PUBLIC_POSTHOG_KEY: ''
+          PUBLIC_POSTHOG_HOST: 'https://eu.i.posthog.com'
         run: npm run test:unit
 
   e2e:
@@ -37,6 +40,8 @@ jobs:
       TEST_USER_PASSWORD: password123
       TEST_ANONYMOUS_PERSON_ID: '2830'
       SEED_DIRECTORY_COUNT: '0'
+      PUBLIC_POSTHOG_KEY: ''
+      PUBLIC_POSTHOG_HOST: 'https://eu.i.posthog.com'
       CI: true
     steps:
       - uses: actions/checkout@v4

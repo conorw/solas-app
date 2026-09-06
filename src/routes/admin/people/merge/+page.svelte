@@ -9,6 +9,7 @@
 	import Dialog, { Title, Content, Actions } from '@smui/dialog';
 	import { Text, PrimaryText, SecondaryText } from '@smui/list';
 	import { getPersonDisplayName, getPersonMeta, getPersonName } from '#lib/person.js';
+	import { capture } from '#lib/analytics.js';
 
 	interface Props {
 		data: PageData;
@@ -30,9 +31,7 @@
 	let merging = $state(false);
 
 	const canMerge = $derived(
-		!!primaryPerson &&
-			!!secondaryPerson &&
-			primaryPerson['Auto ID'] !== secondaryPerson['Auto ID']
+		!!primaryPerson && !!secondaryPerson && primaryPerson['Auto ID'] !== secondaryPerson['Auto ID']
 	);
 
 	async function searchItems(
@@ -113,9 +112,8 @@
 					primaryPersonName,
 					secondaryPersonName
 				};
-				showSnack(
-					`Merged attendance from ${secondaryPersonName} into ${primaryPersonName}.`
-				);
+				showSnack(`Merged attendance from ${secondaryPersonName} into ${primaryPersonName}.`);
+				capture('people_merged');
 				primaryPerson = undefined;
 				secondaryPerson = undefined;
 			} else {
@@ -136,8 +134,8 @@
 	<header class="merge-header">
 		<h1>Merge people</h1>
 		<p>
-			Transfer all attendance from a duplicate person into the person you want to keep, then
-			delete the duplicate from the people list.
+			Transfer all attendance from a duplicate person into the person you want to keep, then delete
+			the duplicate from the people list.
 		</p>
 	</header>
 
@@ -150,8 +148,7 @@
 				<strong> {mergeResult.primaryPersonName}</strong>.
 			</p>
 			<p>
-				You can now delete <strong>{mergeResult.secondaryPersonName}</strong> from the people
-				list.
+				You can now delete <strong>{mergeResult.secondaryPersonName}</strong> from the people list.
 			</p>
 			<Button href="/people" variant="unelevated" class="success-btn">
 				<Label>Go to people list</Label>
@@ -180,10 +177,7 @@
 							</Text>
 						{/snippet}
 					</Autocomplete>
-					<IconButton
-						onclick={() => (primaryPerson = undefined)}
-						aria-label="Clear primary person"
-					>
+					<IconButton onclick={() => (primaryPerson = undefined)} aria-label="Clear primary person">
 						<CommonIcon class="material-icons">clear</CommonIcon>
 					</IconButton>
 				</div>
@@ -274,7 +268,10 @@
 					<span class="id-hint">(ID {primaryPerson?.['Auto ID']})</span>
 				</li>
 			</ul>
-			<p>All attendance for the duplicate will move to the person you keep. The duplicate stays in the system with no attendance until you delete them.</p>
+			<p>
+				All attendance for the duplicate will move to the person you keep. The duplicate stays in
+				the system with no attendance until you delete them.
+			</p>
 		</div>
 	</Content>
 	<Actions>
