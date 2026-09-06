@@ -1,14 +1,16 @@
 /**
- * Seed a test Supabase database (local `supabase start` or optional remote staging)
+ * Seed a test Supabase database (local `supabase start` by default, or optional remote).
  * with TEST_ADMIN / TEST_USER auth accounts, profiles, the anonymous bulk-attendance
  * person, plus sample people / services / attendance for /admin/stats.
  *
  * Usage: npm run seed:dev
+ * By default uses a running local stack (overrides remote PUBLIC_SUPABASE_* from .env).
+ * Remote: SEED_REMOTE=1 plus SEED_ALLOWED_SUPABASE_REFS.
+ *
  * Requires PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,
  * TEST_ADMIN_EMAIL/PASSWORD, TEST_USER_EMAIL/PASSWORD.
  *
  * Optional: SEED_DIRECTORY_COUNT (default 300; use 0 in CI for speed).
- * Optional remote staging: SEED_ALLOWED_SUPABASE_REFS (comma-separated project refs).
  * Optional hard block: SEED_BLOCKED_SUPABASE_REFS (never seed, even if allowlisted).
  *
  * Re-running is safe: previous rows tagged with FirstName/Name prefix
@@ -17,6 +19,10 @@
 import { createClient } from '@supabase/supabase-js';
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
+import {
+	applyLocalSupabaseEnv,
+	isLocalSupabaseUrl
+} from './local-supabase-env.mjs';
 
 const SEED_PREFIX = 'Seed Stats';
 const DIRECTORY_EMAIL = 'seed-list-';
@@ -61,13 +67,7 @@ function projectRefFromUrl(url) {
 
 function isAllowedSeedUrl(url) {
 	if (!url) return false;
-	let host;
-	try {
-		host = new URL(url).hostname.toLowerCase();
-	} catch {
-		return false;
-	}
-	if (host === '127.0.0.1' || host === 'localhost') return true;
+	if (isLocalSupabaseUrl(url)) return true;
 
 	const ref = projectRefFromUrl(url);
 	if (!ref) return false;
@@ -81,12 +81,30 @@ function isAllowedSeedUrl(url) {
 
 loadEnv();
 
+const wantRemote = process.env.SEED_REMOTE === '1';
+if (!wantRemote) {
+	try {
+		const local = applyLocalSupabaseEnv(process.env, { required: true });
+		console.log(`Seeding local Supabase at ${local.PUBLIC_SUPABASE_URL}`);
+	} catch (err) {
+		console.error(err instanceof Error ? err.message : err);
+		console.error('Or set SEED_REMOTE=1 with SEED_ALLOWED_SUPABASE_REFS to seed a remote project.');
+		process.exit(1);
+	}
+} else {
+	console.log(`Seeding remote Supabase at ${process.env.PUBLIC_SUPABASE_URL}`);
+}
+
 const url = process.env.PUBLIC_SUPABASE_URL;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!isAllowedSeedUrl(url)) {
 	console.error(
 		'Refusing to seed: PUBLIC_SUPABASE_URL must be local (127.0.0.1/localhost), or a project ref listed in SEED_ALLOWED_SUPABASE_REFS (and not in SEED_BLOCKED_SUPABASE_REFS)'
 	);
+	process.exit(1);
+}
+if (wantRemote && isLocalSupabaseUrl(url)) {
+	console.error('SEED_REMOTE=1 but PUBLIC_SUPABASE_URL is local; unset SEED_REMOTE or point URL at the remote project.');
 	process.exit(1);
 }
 if (!key) {

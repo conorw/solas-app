@@ -57,15 +57,8 @@ jobs:
       - name: Start local Supabase
         run: supabase start
 
-      - name: Export local Supabase keys
-        run: |
-          supabase status -o env | node scripts/export-local-supabase-env.mjs >> "$GITHUB_ENV"
-
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
-
-      - name: Seed local database
-        run: npm run seed:dev
 
       - name: E2E tests
         run: npm run test:e2e
