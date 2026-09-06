@@ -1,11 +1,15 @@
 /**
- * Seed solas_dev with TEST_ADMIN / TEST_USER auth accounts, profiles,
- * the anonymous bulk-attendance person, plus sample people / services /
- * attendance so /admin/stats screens have data for the current year.
+ * Seed a test Supabase database (local `supabase start` or optional remote staging)
+ * with TEST_ADMIN / TEST_USER auth accounts, profiles, the anonymous bulk-attendance
+ * person, plus sample people / services / attendance for /admin/stats.
  *
  * Usage: npm run seed:dev
  * Requires PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,
- * TEST_ADMIN_EMAIL/PASSWORD, TEST_USER_EMAIL/PASSWORD (from .env locally or env in CI).
+ * TEST_ADMIN_EMAIL/PASSWORD, TEST_USER_EMAIL/PASSWORD.
+ *
+ * Optional: SEED_DIRECTORY_COUNT (default 300; use 0 in CI for speed).
+ * Optional remote staging: SEED_ALLOWED_SUPABASE_REFS (comma-separated project refs).
+ * Optional hard block: SEED_BLOCKED_SUPABASE_REFS (never seed, even if allowlisted).
  *
  * Re-running is safe: previous rows tagged with FirstName/Name prefix
  * "Seed Stats" are replaced.
@@ -15,8 +19,6 @@ import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const SEED_PREFIX = 'Seed Stats';
-/** Extra people so /people virtualization is visible locally. No attendance. */
-const DIRECTORY_COUNT = 300;
 const DIRECTORY_EMAIL = 'seed-list-';
 
 function loadEnv() {
@@ -38,12 +40,53 @@ function loadEnv() {
 	}
 }
 
+function parseRefList(raw) {
+	return new Set(
+		(raw || '')
+			.split(',')
+			.map((s) => s.trim().toLowerCase())
+			.filter(Boolean)
+	);
+}
+
+function projectRefFromUrl(url) {
+	try {
+		const host = new URL(url).hostname.toLowerCase();
+		const match = host.match(/^([a-z0-9]+)\.supabase\.co$/i);
+		return match ? match[1] : null;
+	} catch {
+		return null;
+	}
+}
+
+function isAllowedSeedUrl(url) {
+	if (!url) return false;
+	let host;
+	try {
+		host = new URL(url).hostname.toLowerCase();
+	} catch {
+		return false;
+	}
+	if (host === '127.0.0.1' || host === 'localhost') return true;
+
+	const ref = projectRefFromUrl(url);
+	if (!ref) return false;
+
+	const blocked = parseRefList(process.env.SEED_BLOCKED_SUPABASE_REFS);
+	if (blocked.has(ref)) return false;
+
+	const allowed = parseRefList(process.env.SEED_ALLOWED_SUPABASE_REFS);
+	return allowed.has(ref);
+}
+
 loadEnv();
 
 const url = process.env.PUBLIC_SUPABASE_URL;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-if (!url?.includes('dioxdgkkxprgvaxarxcj')) {
-	console.error('Refusing to seed: PUBLIC_SUPABASE_URL is not solas_dev');
+if (!isAllowedSeedUrl(url)) {
+	console.error(
+		'Refusing to seed: PUBLIC_SUPABASE_URL must be local (127.0.0.1/localhost), or a project ref listed in SEED_ALLOWED_SUPABASE_REFS (and not in SEED_BLOCKED_SUPABASE_REFS)'
+	);
 	process.exit(1);
 }
 if (!key) {
@@ -56,6 +99,9 @@ const adminPass = process.env.TEST_ADMIN_PASSWORD;
 const userEmail = process.env.TEST_USER_EMAIL;
 const userPass = process.env.TEST_USER_PASSWORD;
 const anonId = Number(process.env.TEST_ANONYMOUS_PERSON_ID || 2830);
+const DIRECTORY_COUNT = Number(
+	process.env.SEED_DIRECTORY_COUNT !== undefined ? process.env.SEED_DIRECTORY_COUNT : 300
+);
 
 const sb = createClient(url, key, {
 	auth: { autoRefreshToken: false, persistSession: false }
@@ -245,6 +291,10 @@ function directoryPersonDefs() {
 }
 
 async function seedDirectoryPeople() {
+	if (DIRECTORY_COUNT <= 0) {
+		console.log('directory people skipped (SEED_DIRECTORY_COUNT=0)');
+		return 0;
+	}
 	const defs = directoryPersonDefs();
 	const chunkSize = 100;
 	let inserted = 0;

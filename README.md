@@ -1,38 +1,43 @@
-# create-svelte
+# Solas Attendance Tracker
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
-
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
-
-```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
-```
+SvelteKit app for tracking attendance. Uses Supabase for auth and data.
 
 ## Developing
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+```bash
+npm install
+npm run supabase:start   # Docker required; applies migrations in supabase/
+# Copy keys from `npm run supabase:status` into .env (or use npm run test:e2e:local)
+npm run seed:dev
+npm run dev
+```
+
+## Testing
+
+Unit tests need no database:
 
 ```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+npm run test:unit
 ```
+
+E2E against **local Supabase** (no remote project / GitHub secrets):
+
+```bash
+npm run supabase:start
+npm run test:e2e:local
+```
+
+Or step by step: start Supabase, put `PUBLIC_SUPABASE_*` + service role from `supabase status` into `.env`, set `TEST_*` users, then `npm run seed:dev` and `npm run test:e2e`.
+
+To seed a remote staging project instead, set `SEED_ALLOWED_SUPABASE_REFS` (and optionally `SEED_BLOCKED_SUPABASE_REFS`) in `.env` — never commit real project refs.
+
+CI (`.github/workflows/test.yml`) starts local Supabase on the runner the same way.
 
 ## Building
 
-To create a production version of your app:
-
 ```bash
 npm run build
+npm run preview
 ```
 
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+> To deploy, use the Vercel adapter already configured for this project.
